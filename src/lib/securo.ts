@@ -1,7 +1,10 @@
 import { authedFetch } from './api'
 import type {
   Account,
+  AccountCreatePayload,
+  AccountUpdatePayload,
   Category,
+  CurrencyInfo,
   DashboardSummary,
   PaginatedTransactions,
   SpendingByCategory,
@@ -27,6 +30,28 @@ function query(params: Record<string, string | number | boolean | undefined>): s
 export const listWorkspaces = () => getJson<Workspace[]>('/workspaces')
 
 export const listAccounts = () => getJson<Account[]>('/accounts')
+
+export const listCurrencies = () => getJson<CurrencyInfo[]>('/currencies')
+
+export async function createAccount(payload: AccountCreatePayload): Promise<Account> {
+  const response = await authedFetch('/accounts', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  return (await response.json()) as Account
+}
+
+export async function updateAccount(id: string, payload: AccountUpdatePayload): Promise<Account> {
+  const response = await authedFetch(`/accounts/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+  return (await response.json()) as Account
+}
+
+export async function deleteAccount(id: string): Promise<void> {
+  await authedFetch(`/accounts/${id}`, { method: 'DELETE' })
+}
 
 export const listCategories = () => getJson<Category[]>('/categories')
 
