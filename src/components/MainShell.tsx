@@ -56,13 +56,13 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
   if (loadError) {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-muted-foreground">
           Could not reach {creds.instanceUrl}. Check the connection and try again.
         </p>
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="rounded-xl bg-accent px-6 py-3 font-semibold text-slate-900"
+          className="rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground"
         >
           Retry
         </button>
@@ -86,7 +86,7 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
         {tab === 'settings' && <SettingsScreen creds={creds} onUnpaired={onUnpaired} />}
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 border-t border-slate-800 bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
+      <nav className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <div className="mx-auto flex w-full max-w-md">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
@@ -94,7 +94,7 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
               type="button"
               onClick={() => setTab(id)}
               className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] ${
-                tab === id ? 'text-accent' : 'text-slate-500'
+                tab === id ? 'text-primary' : 'text-muted-foreground'
               }`}
             >
               <Icon size={20} strokeWidth={tab === id ? 2.4 : 1.8} />

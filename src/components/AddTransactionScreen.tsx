@@ -65,20 +65,20 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
   }
 
   const inputClass =
-    'w-full rounded-xl border border-slate-700 bg-surface px-4 py-3 text-white outline-none focus:border-accent'
+    'w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary'
 
   return (
     <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4 p-4 pt-6">
-      <h1 className="text-xl font-semibold text-white">Add transaction</h1>
+      <h1 className="text-xl font-semibold text-foreground">Add transaction</h1>
 
-      <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-slate-700">
+      <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-border">
         {(['debit', 'credit'] as const).map((option) => (
           <button
             key={option}
             type="button"
             onClick={() => setType(option)}
             className={`py-2.5 text-sm font-medium ${
-              type === option ? 'bg-accent text-slate-900' : 'bg-surface text-slate-300'
+              type === option ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground'
             }`}
           >
             {option === 'debit' ? 'Expense' : 'Income'}
@@ -87,7 +87,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </div>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-slate-300">Amount</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">Amount</span>
         <input
           value={amount}
           onChange={(event) => setAmount(event.target.value)}
@@ -99,7 +99,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-slate-300">Description</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">Description</span>
         <input
           value={description}
           onChange={(event) => setDescription(event.target.value)}
@@ -111,7 +111,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-slate-300">Date</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">Date</span>
         <input
           type="date"
           value={date}
@@ -122,7 +122,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-slate-300">Account</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">Account</span>
         <select
           value={accountId}
           onChange={(event) => setAccountId(event.target.value)}
@@ -139,7 +139,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-slate-300">Category (optional)</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">Category (optional)</span>
         <select
           value={categoryId}
           onChange={(event) => setCategoryId(event.target.value)}
@@ -155,7 +155,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       {error && (
-        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
           {error}
         </p>
       )}
@@ -163,7 +163,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       <button
         type="submit"
         disabled={busy || !accountId}
-        className="rounded-xl bg-accent py-3.5 font-semibold text-slate-900 disabled:opacity-50"
+        className="rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground disabled:opacity-50"
       >
         {busy ? 'Saving…' : 'Save transaction'}
       </button>

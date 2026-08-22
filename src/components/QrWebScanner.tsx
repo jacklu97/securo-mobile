@@ -60,14 +60,14 @@ export function QrWebScanner({ onScan, onError }: QrWebScannerProps) {
   }, [])
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-700 bg-black">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-black">
       <video ref={videoRef} className="aspect-square w-full object-cover" muted playsInline />
       {starting && (
-        <div className="absolute inset-0 flex items-center justify-center text-sm text-slate-400">
+        <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
           Starting camera…
         </div>
       )}
-      <div className="pointer-events-none absolute inset-8 rounded-xl border-2 border-accent/70" />
+      <div className="pointer-events-none absolute inset-8 rounded-xl border-2 border-primary/70" />
     </div>
   )
 }

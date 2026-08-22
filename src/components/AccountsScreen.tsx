@@ -57,11 +57,11 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-white">Accounts</h1>
+        <h1 className="text-xl font-semibold text-foreground">Accounts</h1>
         <button
           type="button"
           onClick={() => setFormAccount('new')}
-          className="flex items-center gap-1.5 rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-slate-900"
+          className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
         >
           <Plus size={16} />
           Add
@@ -69,12 +69,12 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
       </header>
 
       {error && (
-        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
           Something went wrong — pull the list again or retry.
         </p>
       )}
 
-      <ul className="divide-y divide-slate-800 overflow-hidden rounded-2xl border border-slate-700 bg-surface">
+      <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
         {accounts.map((account) => {
           const config = getAccountTypeConfig(account.type)
           const mask = formatAccountMask(account)
@@ -91,10 +91,10 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
               >
                 <AccountIcon account={account} />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm text-white">
+                  <span className="block truncate text-sm text-foreground">
                     {getAccountName(account)}
                   </span>
-                  <span className="block text-xs text-slate-500">
+                  <span className="block text-xs text-muted-foreground">
                     {config.label}
                     {mask ? ` · ${mask}` : ''}
                     {account.institution_name ? ` · ${account.institution_name}` : ''}
@@ -102,7 +102,7 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
                 </span>
                 <span
                   className={`shrink-0 text-sm font-medium ${
-                    balanceIsNegative(account) ? 'text-red-300' : 'text-slate-200'
+                    balanceIsNegative(account) ? 'text-rose-500' : 'text-foreground'
                   }`}
                 >
                   {formatMoney(balance, account.currency)}
@@ -115,7 +115,7 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
                     type="button"
                     onClick={() => void handleDelete(account)}
                     disabled={isDeleting}
-                    className="rounded-lg bg-red-500/15 px-2.5 py-1.5 text-xs font-medium text-red-300 disabled:opacity-50"
+                    className="rounded-lg bg-destructive/15 px-2.5 py-1.5 text-xs font-medium text-destructive disabled:opacity-50"
                   >
                     {isDeleting ? '…' : 'Delete'}
                   </button>
@@ -124,7 +124,7 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
                     onClick={() => setConfirmDeleteId(null)}
                     disabled={isDeleting}
                     aria-label="Cancel"
-                    className="p-1.5 text-slate-400"
+                    className="p-1.5 text-muted-foreground"
                   >
                     <X size={14} />
                   </button>
@@ -134,7 +134,7 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
                   type="button"
                   onClick={() => setConfirmDeleteId(account.id)}
                   aria-label={`Delete ${getAccountName(account)}`}
-                  className="shrink-0 p-1.5 text-slate-500 hover:text-red-300"
+                  className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive"
                 >
                   <Trash2 size={16} />
                 </button>
@@ -143,12 +143,12 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
           )
         })}
         {!loading && accounts.length === 0 && !error && (
-          <li className="px-4 py-8 text-center text-sm text-slate-500">
+          <li className="px-4 py-8 text-center text-sm text-muted-foreground">
             No accounts yet — add your first one
           </li>
         )}
         {loading && (
-          <li className="px-4 py-8 text-center text-sm text-slate-500">Loading…</li>
+          <li className="px-4 py-8 text-center text-sm text-muted-foreground">Loading…</li>
         )}
       </ul>
 

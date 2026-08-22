@@ -20,7 +20,7 @@ export function AccountIcon({ account, size = 40 }: AccountIconProps) {
   return (
     <span
       className={`flex shrink-0 items-center justify-center overflow-hidden rounded-xl ${
-        showImage ? 'border border-slate-700 bg-white' : config.bg
+        showImage ? 'border border-border bg-white' : config.bg
       }`}
       style={{ width: size, height: size }}
     >

@@ -89,17 +89,17 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
   }
 
   const inputClass =
-    'w-full rounded-xl border border-slate-700 bg-background px-4 py-3 text-white outline-none focus:border-accent'
-  const labelClass = 'mb-1.5 block text-sm text-slate-300'
+    'w-full rounded-xl border border-border bg-background px-4 py-3 text-foreground outline-none focus:border-primary'
+  const labelClass = 'mb-1.5 block text-sm text-muted-foreground'
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center">
-      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-surface p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-2xl">
+      <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">
+          <h2 className="text-lg font-semibold text-foreground">
             {account ? 'Edit account' : 'Add account'}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="text-slate-400">
+          <button type="button" onClick={onClose} aria-label="Close" className="text-muted-foreground">
             <X size={20} />
           </button>
         </div>
@@ -125,7 +125,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
                 placeholder={name}
                 className={inputClass}
               />
-              <span className="mt-1 block text-xs text-slate-500">
+              <span className="mt-1 block text-xs text-muted-foreground">
                 Shown instead of the bank's name for this account
               </span>
             </label>
@@ -196,7 +196,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
           )}
 
           {isCreditCard && (
-            <div className="space-y-3 rounded-xl border border-slate-700 bg-background/50 p-3">
+            <div className="space-y-3 rounded-xl border border-border bg-background/50 p-3">
               <label className="block">
                 <span className={labelClass}>Credit limit</span>
                 <input
@@ -239,7 +239,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
           )}
 
           {error && (
-            <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
               {error}
             </p>
           )}
@@ -248,14 +248,14 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-700 py-3 text-sm text-slate-300"
+              className="flex-1 rounded-xl border border-border py-3 text-sm text-muted-foreground"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={busy}
-              className="flex-1 rounded-xl bg-accent py-3 font-semibold text-slate-900 disabled:opacity-50"
+              className="flex-1 rounded-xl bg-primary py-3 font-semibold text-primary-foreground disabled:opacity-50"
             >
               {busy ? 'Saving…' : 'Save'}
             </button>

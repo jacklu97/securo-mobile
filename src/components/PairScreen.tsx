@@ -62,20 +62,20 @@ export function PairScreen({ onPaired }: PairScreenProps) {
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col justify-center gap-6 p-6">
       <div className="text-center">
         <img src="/pwa-192.png" alt="" className="mx-auto mb-4 size-20 rounded-2xl" />
-        <h1 className="text-2xl font-semibold text-white">Pair with Securo</h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Open <span className="text-slate-200">Settings → Devices</span> on your Securo instance
+        <h1 className="text-2xl font-semibold text-foreground">Pair with Securo</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Open <span className="text-foreground">Settings → Devices</span> on your Securo instance
           and scan the pairing QR code.
         </p>
       </div>
 
       <label className="block text-left">
-        <span className="mb-1.5 block text-sm text-slate-300">This device's name</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">This device's name</span>
         <input
           value={deviceName}
           onChange={(event) => setDeviceName(event.target.value)}
           maxLength={100}
-          className="w-full rounded-xl border border-slate-700 bg-surface px-4 py-3 text-white outline-none focus:border-accent"
+          className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
         />
       </label>
 
@@ -85,7 +85,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
           <button
             type="button"
             onClick={() => setScanning(false)}
-            className="w-full rounded-xl border border-slate-700 py-3 text-slate-300"
+            className="w-full rounded-xl border border-border py-3 text-muted-foreground"
           >
             Cancel
           </button>
@@ -95,7 +95,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
           type="button"
           disabled={busy}
           onClick={() => (hasNativeScanner() ? void handleNativeScan() : setScanning(true))}
-          className="w-full rounded-xl bg-accent py-3.5 font-semibold text-slate-900 disabled:opacity-50"
+          className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground disabled:opacity-50"
         >
           {busy ? 'Pairing…' : 'Scan QR code'}
         </button>
@@ -104,7 +104,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
       <button
         type="button"
         onClick={() => setShowManual((value) => !value)}
-        className="text-sm text-slate-400 underline-offset-4 hover:underline"
+        className="text-sm text-muted-foreground underline-offset-4 hover:underline"
       >
         {showManual ? 'Hide manual entry' : 'Enter code manually instead'}
       </button>
@@ -123,19 +123,19 @@ export function PairScreen({ onPaired }: PairScreenProps) {
             placeholder="https://securo.example.com"
             type="url"
             required
-            className="w-full rounded-xl border border-slate-700 bg-surface px-4 py-3 text-white outline-none focus:border-accent"
+            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
           />
           <input
             value={manualCode}
             onChange={(event) => setManualCode(event.target.value)}
             placeholder="Pairing code"
             required
-            className="w-full rounded-xl border border-slate-700 bg-surface px-4 py-3 text-white outline-none focus:border-accent"
+            className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
           />
           <button
             type="submit"
             disabled={busy}
-            className="w-full rounded-xl border border-accent py-3 font-semibold text-accent disabled:opacity-50"
+            className="w-full rounded-xl border border-primary py-3 font-semibold text-primary disabled:opacity-50"
           >
             Pair manually
           </button>
@@ -143,7 +143,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
       )}
 
       {error && (
-        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
           {error}
         </p>
       )}
