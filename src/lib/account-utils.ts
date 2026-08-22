@@ -2,17 +2,16 @@ import type { ElementType } from 'react'
 import { Building2, CreditCard, PiggyBank, TrendingUp, Wallet } from 'lucide-react'
 import type { Account } from './types'
 
-// Mirrors securo's ACCOUNT_TYPE_CONFIG (account-icon.tsx): same types, icons and
-// hue per type, with the tints adapted to this app's dark theme.
+// securo's ACCOUNT_TYPE_CONFIG (account-icon.tsx), verbatim classes.
 export const ACCOUNT_TYPE_CONFIG: Record<
   string,
   { icon: ElementType; color: string; bg: string; label: string }
 > = {
-  checking:    { icon: Building2,  color: 'text-indigo-400',  bg: 'bg-indigo-500/15',  label: 'Checking' },
-  savings:     { icon: PiggyBank,  color: 'text-emerald-400', bg: 'bg-emerald-500/15', label: 'Savings' },
-  credit_card: { icon: CreditCard, color: 'text-violet-400',  bg: 'bg-violet-500/15',  label: 'Credit card' },
-  investment:  { icon: TrendingUp, color: 'text-amber-400',   bg: 'bg-amber-500/15',   label: 'Investment' },
-  wallet:      { icon: Wallet,     color: 'text-rose-400',    bg: 'bg-rose-500/15',    label: 'Wallet' },
+  checking:    { icon: Building2,  color: 'text-indigo-600',  bg: 'bg-indigo-100',  label: 'Checking' },
+  savings:     { icon: PiggyBank,  color: 'text-emerald-600', bg: 'bg-emerald-100', label: 'Savings' },
+  credit_card: { icon: CreditCard, color: 'text-violet-600',  bg: 'bg-violet-100',  label: 'Credit card' },
+  investment:  { icon: TrendingUp, color: 'text-amber-600',   bg: 'bg-amber-100',   label: 'Investment' },
+  wallet:      { icon: Wallet,     color: 'text-rose-600',    bg: 'bg-rose-100',    label: 'Wallet' },
 }
 
 export const ACCOUNT_TYPE_OPTIONS = Object.entries(ACCOUNT_TYPE_CONFIG).map(

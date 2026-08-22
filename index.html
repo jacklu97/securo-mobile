@@ -8,7 +8,16 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"
     />
-    <meta name="theme-color" content="#0f172a" />
+    <meta name="theme-color" content="#F8F9FB" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0C0D12" media="(prefers-color-scheme: dark)" />
+    <script>
+      // Apply the stored theme before first paint to avoid a flash.
+      ;(function () {
+        var t = localStorage.getItem('securo_theme')
+        var dark = t === 'dark' || ((!t || t === 'system') && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.classList.toggle('dark', dark)
+      })()
+    </script>
     <title>Securo</title>
   </head>
   <body>

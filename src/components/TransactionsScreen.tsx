@@ -49,25 +49,25 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
-      <h1 className="text-xl font-semibold text-white">Activity</h1>
+      <h1 className="text-xl font-semibold text-foreground">Activity</h1>
 
       <div className="relative">
-        <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" />
+        <Search size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
         <input
           value={q}
           onChange={(event) => handleSearch(event.target.value)}
           placeholder="Search transactions"
-          className="w-full rounded-xl border border-slate-700 bg-surface py-2.5 pl-10 pr-4 text-sm text-white outline-none focus:border-accent"
+          className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground outline-none focus:border-primary"
         />
       </div>
 
       {error && (
-        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
           Could not load transactions.
         </p>
       )}
 
-      <ul className="divide-y divide-slate-800 overflow-hidden rounded-2xl border border-slate-700 bg-surface">
+      <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
         {items.map((tx) => {
           const isCredit = tx.type === 'credit'
           const isTransfer = tx.transfer_pair_id !== null
@@ -75,8 +75,8 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
             <li key={tx.id} className="flex items-center gap-3 px-4 py-3">
               <CategoryIcon icon={tx.category?.icon} color={tx.category?.color} />
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-white">{tx.description}</p>
-                <p className="text-xs text-slate-500">
+                <p className="truncate text-sm text-foreground">{tx.description}</p>
+                <p className="text-xs text-muted-foreground">
                   {formatDay(tx.date)}
                   {tx.payee_name ? ` · ${tx.payee_name}` : ''}
                   {tx.status === 'pending' ? ' · pending' : ''}
@@ -84,7 +84,7 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
               </div>
               <p
                 className={`shrink-0 text-sm font-medium ${
-                  isTransfer ? 'text-slate-400' : isCredit ? 'text-emerald-400' : 'text-slate-200'
+                  isTransfer ? 'text-muted-foreground' : isCredit ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'
                 }`}
               >
                 {isCredit ? '+' : '−'}
@@ -94,7 +94,7 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
           )
         })}
         {!loading && items.length === 0 && !error && (
-          <li className="px-4 py-8 text-center text-sm text-slate-500">No transactions found</li>
+          <li className="px-4 py-8 text-center text-sm text-muted-foreground">No transactions found</li>
         )}
       </ul>
 
@@ -103,7 +103,7 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
           type="button"
           disabled={loading}
           onClick={() => void load(page + 1, q, false)}
-          className="rounded-xl border border-slate-700 py-3 text-sm text-slate-300 disabled:opacity-50"
+          className="rounded-xl border border-border py-3 text-sm text-muted-foreground disabled:opacity-50"
         >
           {loading ? 'Loading…' : `Load more (${items.length} of ${total})`}
         </button>

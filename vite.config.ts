@@ -18,8 +18,8 @@ export default defineConfig({
         name: 'Securo',
         short_name: 'Securo',
         description: 'Mobile companion for your Securo instance',
-        theme_color: '#0f172a',
-        background_color: '#0f172a',
+        theme_color: '#0C0D12',
+        background_color: '#0C0D12',
         display: 'standalone',
         icons: [
           { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
