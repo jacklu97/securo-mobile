@@ -23,7 +23,6 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
     getSpendingByCategory().then(setSpending).catch(() => {})
   }, [workspace])
 
-  const locale = workspace?.locale
   const currency = summary?.primary_currency ?? workspace?.default_currency ?? 'USD'
 
   return (
@@ -54,7 +53,7 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
       <section className="rounded-2xl border border-slate-700 bg-surface p-5">
         <p className="text-sm text-slate-400">Total balance</p>
         <p className="mt-1 text-3xl font-semibold text-white">
-          {summary ? formatMoney(summary.total_balance_primary, currency, locale) : '—'}
+          {summary ? formatMoney(summary.total_balance_primary, currency) : '—'}
         </p>
         {summary && summary.pending_categorization > 0 && (
           <p className="mt-2 text-xs text-amber-300">
@@ -68,13 +67,13 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
         <div className="rounded-2xl border border-slate-700 bg-surface p-4">
           <p className="text-xs text-slate-400">Income this month</p>
           <p className="mt-1 text-lg font-medium text-emerald-400">
-            {summary ? formatMoney(summary.monthly_income_primary, currency, locale) : '—'}
+            {summary ? formatMoney(summary.monthly_income_primary, currency) : '—'}
           </p>
         </div>
         <div className="rounded-2xl border border-slate-700 bg-surface p-4">
           <p className="text-xs text-slate-400">Spent this month</p>
           <p className="mt-1 text-lg font-medium text-red-300">
-            {summary ? formatMoney(summary.monthly_expenses_primary, currency, locale) : '—'}
+            {summary ? formatMoney(summary.monthly_expenses_primary, currency) : '—'}
           </p>
         </div>
       </section>
@@ -88,10 +87,10 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
                 <div className="mb-1 flex items-center justify-between text-sm">
                   <span className="flex min-w-0 items-center gap-2 text-slate-200">
                     <CategoryIcon icon={row.category_icon} color={row.category_color} size={20} />
-                    <span className="truncate">{row.category_name}</span>
+                    <span className="truncate">{row.category_id === null ? 'Uncategorized' : row.category_name}</span>
                   </span>
                   <span className="ml-3 shrink-0 text-slate-400">
-                    {formatMoney(row.total, currency, locale)}
+                    {formatMoney(row.total, currency)}
                   </span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-slate-800">

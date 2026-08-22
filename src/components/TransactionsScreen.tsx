@@ -47,8 +47,6 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
     searchTimer.current = setTimeout(() => void load(1, value, true), 350)
   }
 
-  const locale = workspace?.locale
-
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
       <h1 className="text-xl font-semibold text-white">Activity</h1>
@@ -79,7 +77,7 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-white">{tx.description}</p>
                 <p className="text-xs text-slate-500">
-                  {formatDay(tx.date, locale)}
+                  {formatDay(tx.date)}
                   {tx.payee_name ? ` · ${tx.payee_name}` : ''}
                   {tx.status === 'pending' ? ' · pending' : ''}
                 </p>
@@ -90,7 +88,7 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
                 }`}
               >
                 {isCredit ? '+' : '−'}
-                {formatMoney(Math.abs(tx.amount), tx.currency, locale)}
+                {formatMoney(Math.abs(tx.amount), tx.currency)}
               </p>
             </li>
           )

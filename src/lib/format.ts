@@ -1,22 +1,16 @@
-export function formatMoney(amount: number, currency: string, locale?: string | null): string {
-  try {
-    return new Intl.NumberFormat(locale ?? undefined, {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 2,
-    }).format(amount)
-  } catch {
-    // Unknown currency code — fall back to a plain number with the code appended.
-    return `${amount.toFixed(2)} ${currency}`
-  }
+// Fixed en-US style formatting (1,234.56) regardless of the workspace locale.
+const NUMBER = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+export function formatMoney(amount: number, currency: string): string {
+  return `${NUMBER.format(amount)} ${currency}`
 }
 
-export function formatDay(isoDate: string, locale?: string | null): string {
+export function formatDay(isoDate: string): string {
   const parsed = new Date(`${isoDate}T00:00:00`)
-  return new Intl.DateTimeFormat(locale ?? undefined, {
-    day: 'numeric',
-    month: 'short',
-  }).format(parsed)
+  return new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'short' }).format(parsed)
 }
 
 export function todayIso(): string {
