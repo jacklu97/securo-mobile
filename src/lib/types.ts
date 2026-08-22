@@ -52,14 +52,50 @@ export interface Category {
 
 export interface Account {
   id: string
+  connection_id: string | null
   name: string
   display_name: string | null
   masked_number: string | null
   institution_name: string | null
+  institution_logo_url: string | null
   type: string
   balance: number
+  current_balance: number
   currency: string
+  credit_limit: number | null
+  statement_close_day: number | null
+  payment_due_day: number | null
   is_closed: boolean
+}
+
+export interface AccountCreatePayload {
+  name: string
+  type: string
+  balance?: number
+  balance_date?: string
+  currency?: string
+  credit_limit?: number | null
+  statement_close_day?: number | null
+  payment_due_day?: number | null
+}
+
+export interface AccountUpdatePayload {
+  name?: string
+  display_name?: string | null
+  type?: string
+  balance?: number
+  balance_date?: string
+  currency?: string
+  credit_limit?: number | null
+  statement_close_day?: number | null
+  payment_due_day?: number | null
+}
+
+export interface CurrencyInfo {
+  code: string
+  symbol: string
+  name: string
+  flag: string
 }
 
 export interface Transaction {

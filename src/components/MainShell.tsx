@@ -1,19 +1,21 @@
 import { useEffect, useState } from 'react'
-import { Home, List, Plus, Settings } from 'lucide-react'
+import { Home, Landmark, List, Plus, Settings } from 'lucide-react'
 import { WORKSPACE_STORAGE_KEY } from '../lib/api'
 import { listWorkspaces } from '../lib/securo'
 import type { DeviceCredentials, Workspace } from '../lib/types'
+import { AccountsScreen } from './AccountsScreen'
 import { AddTransactionScreen } from './AddTransactionScreen'
 import { DashboardScreen } from './DashboardScreen'
 import { SettingsScreen } from './SettingsScreen'
 import { TransactionsScreen } from './TransactionsScreen'
 
-type Tab = 'home' | 'activity' | 'add' | 'settings'
+type Tab = 'home' | 'activity' | 'add' | 'accounts' | 'settings'
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'activity', label: 'Activity', icon: List },
   { id: 'add', label: 'Add', icon: Plus },
+  { id: 'accounts', label: 'Accounts', icon: Landmark },
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
@@ -80,6 +82,7 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
         )}
         {tab === 'activity' && <TransactionsScreen workspace={workspace} />}
         {tab === 'add' && <AddTransactionScreen workspace={workspace} onSaved={() => setTab('activity')} />}
+        {tab === 'accounts' && <AccountsScreen workspace={workspace} />}
         {tab === 'settings' && <SettingsScreen creds={creds} onUnpaired={onUnpaired} />}
       </div>
 
