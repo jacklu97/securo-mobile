@@ -161,6 +161,16 @@ export async function sendHeartbeat(deviceId: string): Promise<void> {
   })
 }
 
+/** Rename this device server-side and in the stored credentials. */
+export async function renameDevice(deviceId: string, name: string): Promise<void> {
+  await authedFetch(`/devices/${deviceId}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ name }),
+  })
+  const creds = loadCredentials()
+  if (creds) saveCredentials({ ...creds, deviceName: name })
+}
+
 /** Revoke this device server-side so it disappears from securo's device manager. */
 export async function unpairDevice(deviceId: string): Promise<void> {
   await authedFetch(`/devices/${deviceId}`, { method: 'DELETE' })

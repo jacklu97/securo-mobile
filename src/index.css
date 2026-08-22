@@ -91,3 +91,11 @@ h2,
 h3 {
   letter-spacing: -0.035em;
 }
+
+/* Native QR scanning: the camera preview renders behind the webview, so the
+   whole page stack must be transparent for it to show through. */
+html.qr-scan,
+html.qr-scan body,
+html.qr-scan #root {
+  background: transparent !important;
+}

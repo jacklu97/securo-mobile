@@ -1,4 +1,4 @@
-import { authedFetch } from './api'
+import { WORKSPACE_STORAGE_KEY, authedFetch } from './api'
 import type {
   Account,
   AccountCreatePayload,
@@ -17,9 +17,34 @@ import type {
   Workspace,
 } from './types'
 
+// Short-lived in-memory GET cache so tab switches don't refetch identical
+// data. Lives in the web layer (not Rust) so every target — including the
+// PWA, which has no Rust side — shares the same behavior. Any mutation
+// clears it, and keys are workspace-scoped.
+const CACHE_TTL_MS = 60_000
+const getCache = new Map<string, { at: number; data: unknown }>()
+const inflight = new Map<string, Promise<unknown>>()
+
+export function invalidateCache(): void {
+  getCache.clear()
+}
+
 async function getJson<T>(path: string): Promise<T> {
-  const response = await authedFetch(path)
-  return (await response.json()) as T
+  const workspaceId = localStorage.getItem(WORKSPACE_STORAGE_KEY) ?? ''
+  const key = `${workspaceId}:${path}`
+  const hit = getCache.get(key)
+  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.data as T
+  // Concurrent callers (e.g. a double render) share one request.
+  const pending = inflight.get(key)
+  if (pending) return pending as Promise<T>
+  const promise = (async () => {
+    const response = await authedFetch(path)
+    const data = (await response.json()) as T
+    getCache.set(key, { at: Date.now(), data })
+    return data
+  })().finally(() => inflight.delete(key))
+  inflight.set(key, promise)
+  return promise as Promise<T>
 }
 
 function query(params: Record<string, string | number | boolean | undefined>): string {
@@ -38,6 +63,7 @@ export const listAccounts = () => getJson<Account[]>('/accounts')
 export const listCurrencies = () => getJson<CurrencyInfo[]>('/currencies')
 
 export async function createAccount(payload: AccountCreatePayload): Promise<Account> {
+  invalidateCache()
   const response = await authedFetch('/accounts', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -46,6 +72,7 @@ export async function createAccount(payload: AccountCreatePayload): Promise<Acco
 }
 
 export async function updateAccount(id: string, payload: AccountUpdatePayload): Promise<Account> {
+  invalidateCache()
   const response = await authedFetch(`/accounts/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
@@ -54,6 +81,7 @@ export async function updateAccount(id: string, payload: AccountUpdatePayload): 
 }
 
 export async function deleteAccount(id: string): Promise<void> {
+  invalidateCache()
   await authedFetch(`/accounts/${id}`, { method: 'DELETE' })
 }
 
@@ -62,6 +90,7 @@ export const listCategories = () => getJson<Category[]>('/categories')
 export const listCategoryGroups = () => getJson<CategoryGroup[]>('/category-groups')
 
 export async function createCategory(payload: CategoryPayload): Promise<Category> {
+  invalidateCache()
   const response = await authedFetch('/categories', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -70,6 +99,7 @@ export async function createCategory(payload: CategoryPayload): Promise<Category
 }
 
 export async function updateCategory(id: string, payload: Partial<CategoryPayload>): Promise<Category> {
+  invalidateCache()
   const response = await authedFetch(`/categories/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
@@ -78,6 +108,7 @@ export async function updateCategory(id: string, payload: Partial<CategoryPayloa
 }
 
 export async function deleteCategory(id: string): Promise<void> {
+  invalidateCache()
   await authedFetch(`/categories/${id}`, { method: 'DELETE' })
 }
 
@@ -91,6 +122,7 @@ export const listTransactions = (
 ) => getJson<PaginatedTransactions>(`/transactions${query({ limit: 25, ...params })}`)
 
 export async function createTransaction(payload: TransactionCreatePayload): Promise<Transaction> {
+  invalidateCache()
   const response = await authedFetch('/transactions', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -102,6 +134,7 @@ export async function updateTransaction(
   id: string,
   payload: TransactionUpdatePayload,
 ): Promise<Transaction> {
+  invalidateCache()
   const response = await authedFetch(`/transactions/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(payload),
@@ -110,5 +143,6 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
+  invalidateCache()
   await authedFetch(`/transactions/${id}?apply_to=this`, { method: 'DELETE' })
 }

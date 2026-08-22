@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronRight, Monitor, Moon, Sun, Tags } from 'lucide-react'
-import { ApiError, getCurrentUser, sendHeartbeat, unpairDevice } from '../lib/api'
+import { Check, ChevronRight, Monitor, Moon, Pencil, Sun, Tags } from 'lucide-react'
+import { ApiError, getCurrentUser, renameDevice, sendHeartbeat, unpairDevice } from '../lib/api'
 import { clearCredentials } from '../lib/storage'
 import { loadThemePreference, setThemePreference, type ThemePreference } from '../lib/theme'
 import { CategoriesSheet } from './CategoriesSheet'
@@ -26,14 +26,38 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
   const [user, setUser] = useState<CurrentUser | null>(null)
   const [theme, setTheme] = useState<ThemePreference>(loadThemePreference)
   const [showCategories, setShowCategories] = useState(false)
+  const [displayName, setDisplayName] = useState(creds.deviceName)
+  const [editingName, setEditingName] = useState(false)
+  const [nameDraft, setNameDraft] = useState(creds.deviceName)
+  const [savingName, setSavingName] = useState(false)
+
+  const saveName = async () => {
+    const next = nameDraft.trim()
+    if (!next || next === displayName) {
+      setEditingName(false)
+      return
+    }
+    setSavingName(true)
+    try {
+      await renameDevice(creds.deviceId, next)
+      setDisplayName(next)
+      setEditingName(false)
+    } catch {
+      // keep the editor open so the user can retry
+    } finally {
+      setSavingName(false)
+    }
+  }
 
   const beat = useCallback(async () => {
     try {
       await sendHeartbeat(creds.deviceId)
       setStatus('connected')
     } catch (err) {
-      // A dead refresh token means the device was revoked server-side.
-      if (err instanceof ApiError && err.status === 401) {
+      // 401 = dead refresh token; 404 = the device row itself was revoked.
+      // Either way this pairing is gone — reset to the pair screen instead
+      // of showing a misleading "Offline".
+      if (err instanceof ApiError && (err.status === 401 || err.status === 404)) {
         clearCredentials()
         onUnpaired()
         return
@@ -71,7 +95,39 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
         <img src="/pwa-192.png" alt="" className="size-10 rounded-xl" />
         <div className="flex-1">
           <h1 className="text-lg font-semibold text-foreground">Settings</h1>
-          <p className="text-xs text-muted-foreground">{creds.deviceName}</p>
+          {editingName ? (
+            <span className="mt-0.5 flex items-center gap-1.5">
+              <input
+                value={nameDraft}
+                onChange={(event) => setNameDraft(event.target.value)}
+                maxLength={100}
+                autoFocus
+                onKeyDown={(event) => event.key === 'Enter' && void saveName()}
+                className="w-40 rounded-lg border border-border bg-card px-2 py-1 text-xs text-foreground outline-none focus:border-primary"
+              />
+              <button
+                type="button"
+                onClick={() => void saveName()}
+                disabled={savingName}
+                aria-label="Save name"
+                className="p-1 text-primary disabled:opacity-50"
+              >
+                <Check size={14} />
+              </button>
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setNameDraft(displayName)
+                setEditingName(true)
+              }}
+              className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground"
+            >
+              {displayName}
+              <Pencil size={11} />
+            </button>
+          )}
         </div>
         <span
           className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${

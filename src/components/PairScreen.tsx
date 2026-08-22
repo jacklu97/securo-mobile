@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ApiError, pairDevice, parseQrPayload } from '../lib/api'
-import { defaultDeviceName, hasNativeScanner } from '../lib/platform'
+import { defaultDeviceName, hasNativeScanner, suggestedDeviceName } from '../lib/platform'
 import type { DeviceCredentials } from '../lib/types'
 import { QrWebScanner } from './QrWebScanner'
 
@@ -17,6 +17,24 @@ export function PairScreen({ onPaired }: PairScreenProps) {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errorDetails, setErrorDetails] = useState<string | null>(null)
+  const [nativeScanning, setNativeScanning] = useState(false)
+  const scanCancelledRef = useRef(false)
+  const nameTouchedRef = useRef(false)
+
+  // Pre-fill the device name with the OS-reported hostname (often the name
+  // the user gave the phone), unless they already typed their own.
+  useEffect(() => {
+    suggestedDeviceName().then((name) => {
+      if (name && !nameTouchedRef.current) setDeviceName(name)
+    })
+  }, [])
+
+  // The windowed scanner renders the camera behind the webview, so every
+  // layer above it has to become transparent while scanning.
+  useEffect(() => {
+    document.documentElement.classList.toggle('qr-scan', nativeScanning)
+    return () => document.documentElement.classList.remove('qr-scan')
+  }, [nativeScanning])
 
   const pair = async (url: string, code: string) => {
     setBusy(true)
@@ -45,6 +63,8 @@ export function PairScreen({ onPaired }: PairScreenProps) {
 
   const handleNativeScan = async () => {
     setError(null)
+    setErrorDetails(null)
+    scanCancelledRef.current = false
     try {
       const scanner = await import('@tauri-apps/plugin-barcode-scanner')
       let permission = await scanner.checkPermissions()
@@ -55,11 +75,51 @@ export function PairScreen({ onPaired }: PairScreenProps) {
         setError('Camera permission denied — use manual entry below')
         return
       }
-      const result = await scanner.scan({ windowed: false, formats: [scanner.Format.QRCode] })
+      setNativeScanning(true)
+      const result = await scanner.scan({ windowed: true, formats: [scanner.Format.QRCode] })
+      setNativeScanning(false)
       handleScanContent(result.content)
     } catch {
-      setError('Scan cancelled or failed — try again or use manual entry')
+      if (!scanCancelledRef.current) {
+        setError('Scan cancelled or failed — try again or use manual entry')
+      }
+    } finally {
+      setNativeScanning(false)
     }
+  }
+
+  const cancelNativeScan = async () => {
+    scanCancelledRef.current = true
+    try {
+      const scanner = await import('@tauri-apps/plugin-barcode-scanner')
+      await scanner.cancel()
+    } catch {
+      // scan promise settles either way
+    }
+    setNativeScanning(false)
+  }
+
+  if (nativeScanning) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center">
+        <p className="mb-8 rounded-full bg-black/60 px-5 py-2.5 text-sm font-medium text-white">
+          Point at the Securo QR code
+        </p>
+        {/* Transparent window: the shadow dims everything outside it while the
+            camera stays visible through the center. */}
+        <div
+          className="size-64 rounded-3xl border-2 border-primary"
+          style={{ boxShadow: '0 0 0 200vmax rgba(0, 0, 0, 0.55)' }}
+        />
+        <button
+          type="button"
+          onClick={() => void cancelNativeScan()}
+          className="mt-10 rounded-full bg-black/60 px-7 py-2.5 text-sm text-white"
+        >
+          Cancel
+        </button>
+      </div>
+    )
   }
 
   return (
@@ -77,7 +137,10 @@ export function PairScreen({ onPaired }: PairScreenProps) {
         <span className="mb-1.5 block text-sm text-muted-foreground">This device's name</span>
         <input
           value={deviceName}
-          onChange={(event) => setDeviceName(event.target.value)}
+          onChange={(event) => {
+            nameTouchedRef.current = true
+            setDeviceName(event.target.value)
+          }}
           maxLength={100}
           className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
         />

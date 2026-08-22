@@ -15,6 +15,22 @@ export function hasNativeScanner(): boolean {
   return isTauri() && devicePlatform() !== 'other'
 }
 
+/**
+ * Best-effort friendly name: the OS hostname on native builds (Android often
+ * reports the user-visible device name there), falling back to a generic one.
+ */
+export async function suggestedDeviceName(): Promise<string | null> {
+  if (!isTauri()) return null
+  try {
+    const os = await import('@tauri-apps/plugin-os')
+    const name = await os.hostname()
+    if (name && name.trim() && name !== 'localhost') return name.trim()
+  } catch {
+    // plugin unavailable — caller keeps the default
+  }
+  return null
+}
+
 export function defaultDeviceName(): string {
   switch (devicePlatform()) {
     case 'android':
