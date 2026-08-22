@@ -87,16 +87,20 @@ async function refreshTokens(creds: DeviceCredentials): Promise<DeviceCredential
   return next
 }
 
+export const WORKSPACE_STORAGE_KEY = 'securo_workspace_id'
+
 /** Authenticated request against the paired instance, refreshing tokens once on 401. */
 export async function authedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   let creds = loadCredentials()
   if (!creds) throw new ApiError(401, 'Not paired')
 
+  const workspaceId = localStorage.getItem(WORKSPACE_STORAGE_KEY)
   const send = (token: string) =>
     doFetch(`${apiBase(creds!.instanceUrl)}${path}`, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
+        ...(workspaceId ? { 'X-Workspace-Id': workspaceId } : {}),
         ...init.headers,
         Authorization: `Bearer ${token}`,
       },
