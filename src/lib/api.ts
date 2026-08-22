@@ -128,3 +128,8 @@ export async function sendHeartbeat(deviceId: string): Promise<void> {
     body: JSON.stringify({ device_id: deviceId }),
   })
 }
+
+/** Revoke this device server-side so it disappears from securo's device manager. */
+export async function unpairDevice(deviceId: string): Promise<void> {
+  await authedFetch(`/devices/${deviceId}`, { method: 'DELETE' })
+}
