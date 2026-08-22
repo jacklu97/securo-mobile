@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Monitor, Moon, Sun } from 'lucide-react'
+import { ChevronRight, Monitor, Moon, Sun, Tags } from 'lucide-react'
 import { ApiError, getCurrentUser, sendHeartbeat, unpairDevice } from '../lib/api'
 import { clearCredentials } from '../lib/storage'
 import { loadThemePreference, setThemePreference, type ThemePreference } from '../lib/theme'
+import { CategoriesSheet } from './CategoriesSheet'
 import type { CurrentUser, DeviceCredentials } from '../lib/types'
 
 const THEME_OPTIONS: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
@@ -24,6 +25,7 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
   const [status, setStatus] = useState<Status>('connecting')
   const [user, setUser] = useState<CurrentUser | null>(null)
   const [theme, setTheme] = useState<ThemePreference>(loadThemePreference)
+  const [showCategories, setShowCategories] = useState(false)
 
   const beat = useCallback(async () => {
     try {
@@ -133,6 +135,19 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
         </div>
       </section>
 
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Workspace</h2>
+        <button
+          type="button"
+          onClick={() => setShowCategories(true)}
+          className="flex w-full items-center gap-3 rounded-xl border border-border px-4 py-3 text-left"
+        >
+          <Tags size={18} className="text-primary" />
+          <span className="flex-1 text-sm text-foreground">Manage categories</span>
+          <ChevronRight size={16} className="text-muted-foreground" />
+        </button>
+      </section>
+
       <div className="flex-1" />
 
       <button
@@ -143,6 +158,8 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
       >
         {unpairing ? 'Unpairing…' : 'Unpair this device'}
       </button>
+
+      {showCategories && <CategoriesSheet onClose={() => setShowCategories(false)} />}
     </div>
   )
 }

@@ -47,6 +47,25 @@ export interface Category {
   icon: string
   color: string
   is_system: boolean
+  treat_as_transfer: boolean
+  is_ignored: boolean
+}
+
+export interface CategoryGroup {
+  id: string
+  name: string
+  icon: string
+  color: string
+  position: number
+  is_system: boolean
+}
+
+export interface CategoryPayload {
+  name: string
+  icon: string
+  color: string
+  group_id: string | null
+  treat_as_transfer: boolean
   is_ignored: boolean
 }
 
