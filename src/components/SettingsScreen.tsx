@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ApiError, getCurrentUser, sendHeartbeat } from '../lib/api'
+import { ApiError, getCurrentUser, sendHeartbeat, unpairDevice } from '../lib/api'
 import { clearCredentials } from '../lib/storage'
 import type { CurrentUser, DeviceCredentials } from '../lib/types'
 
@@ -38,9 +38,20 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
     return () => clearInterval(interval)
   }, [beat])
 
-  const unpair = () => {
-    clearCredentials()
-    onUnpaired()
+  const [unpairing, setUnpairing] = useState(false)
+
+  const unpair = async () => {
+    setUnpairing(true)
+    try {
+      // Revoke server-side so securo's device manager forgets this device.
+      // Best-effort: if the instance is unreachable we still unpair locally.
+      await unpairDevice(creds.deviceId)
+    } catch {
+      // ignore — local credentials are cleared either way
+    } finally {
+      clearCredentials()
+      onUnpaired()
+    }
   }
 
   return (
@@ -93,10 +104,11 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
 
       <button
         type="button"
-        onClick={unpair}
-        className="w-full rounded-xl border border-red-500/40 py-3 text-sm text-red-300"
+        onClick={() => void unpair()}
+        disabled={unpairing}
+        className="w-full rounded-xl border border-red-500/40 py-3 text-sm text-red-300 disabled:opacity-50"
       >
-        Unpair this device
+        {unpairing ? 'Unpairing…' : 'Unpair this device'}
       </button>
     </div>
   )
