@@ -109,6 +109,7 @@ export interface Transaction {
   type: 'debit' | 'credit'
   status: 'posted' | 'pending'
   payee_name: string | null
+  notes: string | null
   transfer_pair_id: string | null
   is_ignored: boolean
 }
@@ -137,6 +138,20 @@ export interface TransactionCreatePayload {
   account_id: string
   category_id?: string | null
   notes?: string | null
+}
+
+export type TransactionUpdatePayload = Partial<TransactionCreatePayload>
+
+export interface TransactionFilters {
+  account_id?: string
+  category_id?: string
+  uncategorized?: boolean
+  type?: 'debit' | 'credit'
+  status?: 'posted' | 'pending'
+  from?: string
+  to?: string
+  min_amount?: number
+  max_amount?: number
 }
 
 export interface DashboardSummary {
