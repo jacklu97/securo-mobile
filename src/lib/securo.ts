@@ -4,6 +4,8 @@ import type {
   AccountCreatePayload,
   AccountUpdatePayload,
   Category,
+  CategoryGroup,
+  CategoryPayload,
   CurrencyInfo,
   DashboardSummary,
   PaginatedTransactions,
@@ -56,6 +58,28 @@ export async function deleteAccount(id: string): Promise<void> {
 }
 
 export const listCategories = () => getJson<Category[]>('/categories')
+
+export const listCategoryGroups = () => getJson<CategoryGroup[]>('/category-groups')
+
+export async function createCategory(payload: CategoryPayload): Promise<Category> {
+  const response = await authedFetch('/categories', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+  return (await response.json()) as Category
+}
+
+export async function updateCategory(id: string, payload: Partial<CategoryPayload>): Promise<Category> {
+  const response = await authedFetch(`/categories/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+  return (await response.json()) as Category
+}
+
+export async function deleteCategory(id: string): Promise<void> {
+  await authedFetch(`/categories/${id}`, { method: 'DELETE' })
+}
 
 export const getDashboardSummary = () => getJson<DashboardSummary>('/dashboard/summary')
 
