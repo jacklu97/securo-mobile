@@ -10,6 +10,8 @@ import type {
   SpendingByCategory,
   Transaction,
   TransactionCreatePayload,
+  TransactionFilters,
+  TransactionUpdatePayload,
   Workspace,
 } from './types'
 
@@ -60,8 +62,9 @@ export const getDashboardSummary = () => getJson<DashboardSummary>('/dashboard/s
 export const getSpendingByCategory = () =>
   getJson<SpendingByCategory[]>('/dashboard/spending-by-category')
 
-export const listTransactions = (params: { page?: number; limit?: number; q?: string }) =>
-  getJson<PaginatedTransactions>(`/transactions${query({ limit: 25, ...params })}`)
+export const listTransactions = (
+  params: { page?: number; limit?: number; q?: string } & TransactionFilters,
+) => getJson<PaginatedTransactions>(`/transactions${query({ limit: 25, ...params })}`)
 
 export async function createTransaction(payload: TransactionCreatePayload): Promise<Transaction> {
   const response = await authedFetch('/transactions', {
@@ -69,4 +72,19 @@ export async function createTransaction(payload: TransactionCreatePayload): Prom
     body: JSON.stringify(payload),
   })
   return (await response.json()) as Transaction
+}
+
+export async function updateTransaction(
+  id: string,
+  payload: TransactionUpdatePayload,
+): Promise<Transaction> {
+  const response = await authedFetch(`/transactions/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload),
+  })
+  return (await response.json()) as Transaction
+}
+
+export async function deleteTransaction(id: string): Promise<void> {
+  await authedFetch(`/transactions/${id}?apply_to=this`, { method: 'DELETE' })
 }

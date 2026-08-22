@@ -30,6 +30,14 @@ export function formatAccountMask(account: Account): string | null {
   return account.masked_number ? `•••• ${account.masked_number}` : null
 }
 
+/** Single-line label for <select> options, as in securo's account-utils. */
+export function getAccountLabel(account: Account): string {
+  const name = getAccountName(account)
+  if (account.display_name) return name
+  const mask = formatAccountMask(account)
+  return mask ? `${name} ${mask}` : name
+}
+
 /** Red when the balance means debt: positive on a credit card, negative elsewhere. */
 export function balanceIsNegative(account: Account): boolean {
   const balance = Number(account.current_balance)
