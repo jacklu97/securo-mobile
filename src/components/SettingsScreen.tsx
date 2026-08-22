@@ -5,14 +5,14 @@ import type { CurrentUser, DeviceCredentials } from '../lib/types'
 
 const HEARTBEAT_MS = 30_000
 
-interface HomeScreenProps {
+interface SettingsScreenProps {
   creds: DeviceCredentials
   onUnpaired: () => void
 }
 
 type Status = 'connecting' | 'connected' | 'offline'
 
-export function HomeScreen({ creds, onUnpaired }: HomeScreenProps) {
+export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
   const [status, setStatus] = useState<Status>('connecting')
   const [user, setUser] = useState<CurrentUser | null>(null)
 
@@ -48,7 +48,7 @@ export function HomeScreen({ creds, onUnpaired }: HomeScreenProps) {
       <header className="flex items-center gap-3 pt-4">
         <img src="/pwa-192.png" alt="" className="size-10 rounded-xl" />
         <div className="flex-1">
-          <h1 className="text-lg font-semibold text-white">Securo</h1>
+          <h1 className="text-lg font-semibold text-white">Settings</h1>
           <p className="text-xs text-slate-400">{creds.deviceName}</p>
         </div>
         <span
@@ -89,11 +89,7 @@ export function HomeScreen({ creds, onUnpaired }: HomeScreenProps) {
         </dl>
       </section>
 
-      <section className="flex flex-1 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-700 p-8 text-center">
-        <p className="text-sm text-slate-400">
-          This device is paired. Securo features (dashboard, transactions, …) land here next.
-        </p>
-      </section>
+      <div className="flex-1" />
 
       <button
         type="button"
