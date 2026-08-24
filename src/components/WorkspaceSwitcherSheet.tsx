@@ -1,17 +1,18 @@
+import { useTranslation } from 'react-i18next'
 import { Check, X } from 'lucide-react'
 import type { Workspace } from '../lib/types'
 import { WorkspaceIcon } from './WorkspaceIcon'
 
 const KIND_LABEL: Record<string, string> = {
-  personal: 'Personal',
-  business: 'Business',
+  personal: 'workspace.kindPersonal',
+  business: 'workspace.kindBusiness',
 }
 
 const ROLE_LABEL: Record<string, string> = {
-  owner: 'Owner',
-  editor: 'Editor',
-  viewer: 'Viewer',
-  manager: 'Manager',
+  owner: 'workspace.roleOwner',
+  editor: 'workspace.roleEditor',
+  viewer: 'workspace.roleViewer',
+  manager: 'workspace.roleManager',
 }
 
 interface WorkspaceSwitcherSheetProps {
@@ -27,12 +28,13 @@ export function WorkspaceSwitcherSheet({
   onSelect,
   onClose,
 }: WorkspaceSwitcherSheetProps) {
+  const { t } = useTranslation()
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center">
       <div className="w-full max-w-md rounded-t-2xl bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">Switch workspace</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="text-muted-foreground">
+          <h2 className="text-lg font-semibold text-foreground">{t('workspace.switchTitle')}</h2>
+          <button type="button" onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <X size={20} />
           </button>
         </div>
@@ -41,8 +43,8 @@ export function WorkspaceSwitcherSheet({
           {workspaces.map((workspace) => {
             const isActive = workspace.id === currentId
             const meta = [
-              KIND_LABEL[workspace.kind] ?? workspace.kind,
-              workspace.role ? ROLE_LABEL[workspace.role] ?? workspace.role : null,
+              KIND_LABEL[workspace.kind] ? t(KIND_LABEL[workspace.kind]) : workspace.kind,
+              workspace.role ? (ROLE_LABEL[workspace.role] ? t(ROLE_LABEL[workspace.role]) : workspace.role) : null,
             ]
               .filter(Boolean)
               .join(' · ')

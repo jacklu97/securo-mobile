@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import { formatDay, formatMoney } from '../lib/format'
@@ -20,6 +21,7 @@ interface TransactionsScreenProps {
 }
 
 export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
+  const { t } = useTranslation()
   const [items, setItems] = useState<Transaction[]>([])
   const [total, setTotal] = useState(0)
   const [summary, setSummary] = useState<TransactionsSummary | null>(null)
@@ -95,7 +97,7 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
-      <h1 className="text-xl font-semibold text-foreground">Activity</h1>
+      <h1 className="text-xl font-semibold text-foreground">{t('tabs.activity')}</h1>
 
       <div className="flex gap-2">
         <div className="relative flex-1">
@@ -106,14 +108,14 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
           <input
             value={q}
             onChange={(event) => handleSearch(event.target.value)}
-            placeholder="Search transactions"
+            placeholder={t('activity.search')}
             className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground outline-none focus:border-primary"
           />
         </div>
         <button
           type="button"
           onClick={() => setShowFilters(true)}
-          aria-label="Filters"
+          aria-label={t('activity.filters')}
           className={`relative flex items-center justify-center rounded-xl border px-3 ${
             activeFilterCount > 0
               ? 'border-primary text-primary'
@@ -136,14 +138,14 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
           </span>
           <span className="text-rose-500">−{formatMoney(summary.expense, currency)}</span>
           <span className="font-medium text-foreground">
-            Net {formatMoney(summary.net, currency)}
+            {t('activity.net', { amount: formatMoney(summary.net, currency) })}
           </span>
         </div>
       )}
 
       {error && (
         <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          Could not load transactions.
+          {t('activity.couldNotLoad')}
         </p>
       )}
 
@@ -164,8 +166,8 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
                   <span className="block text-xs text-muted-foreground">
                     {formatDay(tx.date)}
                     {tx.payee_name ? ` · ${tx.payee_name}` : ''}
-                    {tx.status === 'pending' ? ' · pending' : ''}
-                    {isTransfer ? ' · transfer' : ''}
+                    {tx.status === 'pending' ? ` · ${t('activity.pending')}` : ''}
+                    {isTransfer ? ` · ${t('activity.transfer')}` : ''}
                   </span>
                 </span>
                 <span
@@ -186,11 +188,11 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
         })}
         {!loading && items.length === 0 && !error && (
           <li className="px-4 py-8 text-center text-sm text-muted-foreground">
-            No transactions found
+            {t('activity.none')}
           </li>
         )}
         {loading && items.length === 0 && (
-          <li className="px-4 py-8 text-center text-sm text-muted-foreground">Loading…</li>
+          <li className="px-4 py-8 text-center text-sm text-muted-foreground">{t('common.loading')}</li>
         )}
       </ul>
 
@@ -201,7 +203,7 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
           onClick={() => void load(page + 1, q, filters, false)}
           className="rounded-xl border border-border py-3 text-sm text-muted-foreground disabled:opacity-50"
         >
-          {loading ? 'Loading…' : `Load more (${items.length} of ${total})`}
+          {loading ? t('common.loading') : t('activity.loadMore', { shown: items.length, total })}
         </button>
       )}
 

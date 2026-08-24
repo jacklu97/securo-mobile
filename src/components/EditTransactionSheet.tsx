@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { getAccountLabel } from '../lib/account-utils'
@@ -19,6 +20,7 @@ export function EditTransactionSheet({
   onClose,
   onSaved,
 }: EditTransactionSheetProps) {
+  const { t } = useTranslation()
   // Transfer legs are kept in sync server-side per pair; editing one leg's
   // money fields here would desync them, so those fields are locked.
   const isTransfer = transaction.transfer_pair_id !== null
@@ -37,7 +39,7 @@ export function EditTransactionSheet({
     event.preventDefault()
     const value = Number.parseFloat(amount)
     if (!isTransfer && (!Number.isFinite(value) || value <= 0)) {
-      setError('Enter an amount greater than zero')
+      setError(t('tx.errAmount'))
       return
     }
     setBusy(true)
@@ -56,7 +58,7 @@ export function EditTransactionSheet({
       })
       onSaved()
     } catch {
-      setError('Could not save the transaction')
+      setError(t('tx.errSave'))
       setBusy(false)
     }
   }
@@ -68,7 +70,7 @@ export function EditTransactionSheet({
       await deleteTransaction(transaction.id)
       onSaved()
     } catch {
-      setError('Could not delete the transaction')
+      setError(t('tx.errDelete'))
       setBusy(false)
     }
   }
@@ -81,15 +83,15 @@ export function EditTransactionSheet({
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:items-center">
       <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-foreground">Edit transaction</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="text-muted-foreground">
+          <h2 className="text-lg font-semibold text-foreground">{t('tx.editTitle')}</h2>
+          <button type="button" onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <X size={20} />
           </button>
         </div>
 
         {isTransfer && (
           <p className="mb-4 rounded-xl border border-border bg-background/50 px-4 py-3 text-xs text-muted-foreground">
-            This is one leg of a transfer — amount, date, type and account are managed with its pair.
+            {t('tx.transferNote')}
           </p>
         )}
 
@@ -105,14 +107,14 @@ export function EditTransactionSheet({
                   type === option ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground'
                 }`}
               >
-                {option === 'debit' ? 'Expense' : 'Income'}
+                {option === 'debit' ? t('tx.expense') : t('tx.income')}
               </button>
             ))}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className={labelClass}>Amount</span>
+              <span className={labelClass}>{t('tx.amount')}</span>
               <input
                 value={amount}
                 onChange={(event) => setAmount(event.target.value)}
@@ -123,7 +125,7 @@ export function EditTransactionSheet({
               />
             </label>
             <label className="block">
-              <span className={labelClass}>Date</span>
+              <span className={labelClass}>{t('tx.date')}</span>
               <input
                 type="date"
                 value={date}
@@ -136,7 +138,7 @@ export function EditTransactionSheet({
           </div>
 
           <label className="block">
-            <span className={labelClass}>Description</span>
+            <span className={labelClass}>{t('tx.description')}</span>
             <input
               value={description}
               onChange={(event) => setDescription(event.target.value)}
@@ -147,7 +149,7 @@ export function EditTransactionSheet({
           </label>
 
           <label className="block">
-            <span className={labelClass}>Account</span>
+            <span className={labelClass}>{t('tx.account')}</span>
             <select
               value={accountId}
               onChange={(event) => setAccountId(event.target.value)}
@@ -163,13 +165,13 @@ export function EditTransactionSheet({
           </label>
 
           <label className="block">
-            <span className={labelClass}>Category</span>
+            <span className={labelClass}>{t('tx.category')}</span>
             <select
               value={categoryId}
               onChange={(event) => setCategoryId(event.target.value)}
               className={inputClass}
             >
-              <option value="">Uncategorized</option>
+              <option value="">{t('home.uncategorized')}</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -179,7 +181,7 @@ export function EditTransactionSheet({
           </label>
 
           <label className="block">
-            <span className={labelClass}>Notes</span>
+            <span className={labelClass}>{t('tx.notes')}</span>
             <textarea
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
@@ -203,7 +205,7 @@ export function EditTransactionSheet({
                   disabled={busy}
                   className="flex-1 rounded-xl bg-destructive py-3 font-semibold text-destructive-foreground disabled:opacity-50"
                 >
-                  {busy ? 'Deleting…' : 'Confirm delete'}
+                  {busy ? t('common.deleting') : t('tx.confirmDelete')}
                 </button>
                 <button
                   type="button"
@@ -211,7 +213,7 @@ export function EditTransactionSheet({
                   disabled={busy}
                   className="flex-1 rounded-xl border border-border py-3 text-sm text-muted-foreground"
                 >
-                  Keep it
+                  {t('tx.keepIt')}
                 </button>
               </>
             ) : (
@@ -222,14 +224,14 @@ export function EditTransactionSheet({
                   disabled={busy}
                   className="flex-1 rounded-xl border border-destructive/40 py-3 text-sm text-destructive"
                 >
-                  Delete
+                  {t('common.delete')}
                 </button>
                 <button
                   type="submit"
                   disabled={busy}
                   className="flex-1 rounded-xl bg-primary py-3 font-semibold text-primary-foreground disabled:opacity-50"
                 >
-                  {busy ? 'Saving…' : 'Save'}
+                  {busy ? t('common.saving') : t('common.save')}
                 </button>
               </>
             )}

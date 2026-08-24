@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowLeft, Plus, Trash2, X } from 'lucide-react'
 import { deleteCategory, listCategories, listCategoryGroups } from '../lib/securo'
@@ -10,6 +11,7 @@ interface CategoriesSheetProps {
 }
 
 export function CategoriesSheet({ onClose }: CategoriesSheetProps) {
+  const { t } = useTranslation()
   const [categories, setCategories] = useState<Category[]>([])
   const [groups, setGroups] = useState<CategoryGroup[]>([])
   const [loading, setLoading] = useState(true)
@@ -57,7 +59,7 @@ export function CategoriesSheet({ onClose }: CategoriesSheetProps) {
       color: group.color,
       items: categories.filter((category) => category.group_id === group.id),
     })),
-    { key: 'ungrouped', title: 'Other', items: categories.filter((category) => !category.group_id) },
+    { key: 'ungrouped', title: t('categories.other'), items: categories.filter((category) => !category.group_id) },
   ].filter((section) => section.items.length > 0)
 
   const renderRow = (category: Category) => {
@@ -76,8 +78,8 @@ export function CategoriesSheet({ onClose }: CategoriesSheetProps) {
             {(category.treat_as_transfer || category.is_ignored) && (
               <span className="block text-xs text-muted-foreground">
                 {[
-                  category.treat_as_transfer ? 'transfer' : null,
-                  category.is_ignored ? 'ignored' : null,
+                  category.treat_as_transfer ? t('categories.badgeTransfer') : null,
+                  category.is_ignored ? t('categories.badgeIgnored') : null,
                 ]
                   .filter(Boolean)
                   .join(' · ')}
@@ -98,13 +100,13 @@ export function CategoriesSheet({ onClose }: CategoriesSheetProps) {
               disabled={isDeleting}
               className="rounded-lg bg-destructive/15 px-2.5 py-1.5 text-xs font-medium text-destructive disabled:opacity-50"
             >
-              {isDeleting ? '…' : 'Delete'}
+              {isDeleting ? '…' : t('common.delete')}
             </button>
             <button
               type="button"
               onClick={() => setConfirmDeleteId(null)}
               disabled={isDeleting}
-              aria-label="Cancel"
+              aria-label={t('common.cancel')}
               className="p-1.5 text-muted-foreground"
             >
               <X size={14} />
@@ -115,7 +117,7 @@ export function CategoriesSheet({ onClose }: CategoriesSheetProps) {
             <button
               type="button"
               onClick={() => setConfirmDeleteId(category.id)}
-              aria-label={`Delete ${category.name}`}
+              aria-label={`${t('common.delete')} ${category.name}`}
               className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive"
             >
               <Trash2 size={15} />
@@ -129,27 +131,27 @@ export function CategoriesSheet({ onClose }: CategoriesSheetProps) {
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background pt-[env(safe-area-inset-top)]">
       <header className="mx-auto flex w-full max-w-md items-center gap-3 p-4">
-        <button type="button" onClick={onClose} aria-label="Back" className="text-muted-foreground">
+        <button type="button" onClick={onClose} aria-label={t('common.back')} className="text-muted-foreground">
           <ArrowLeft size={20} />
         </button>
-        <h1 className="flex-1 text-lg font-semibold text-foreground">Categories</h1>
+        <h1 className="flex-1 text-lg font-semibold text-foreground">{t('categories.title')}</h1>
         <button
           type="button"
           onClick={() => setForm('new')}
           className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
         >
           <Plus size={16} />
-          Add
+          {t('common.add')}
         </button>
       </header>
 
       <div className="mx-auto w-full max-w-md flex-1 space-y-4 overflow-y-auto p-4 pt-0 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         {error && (
           <p className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-            Something went wrong — close and reopen to retry.
+            {t('categories.error')}
           </p>
         )}
-        {loading && <p className="py-8 text-center text-sm text-muted-foreground">Loading…</p>}
+        {loading && <p className="py-8 text-center text-sm text-muted-foreground">{t('common.loading')}</p>}
 
         {sections.map((section) => (
           <section
@@ -168,7 +170,7 @@ export function CategoriesSheet({ onClose }: CategoriesSheetProps) {
 
         {!loading && sections.length === 0 && !error && (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            No categories yet — add your first one
+            {t('categories.empty')}
           </p>
         )}
       </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { X } from 'lucide-react'
 import { ACCOUNT_TYPE_OPTIONS } from '../lib/account-utils'
@@ -19,6 +20,7 @@ function parseDay(value: string): number | null {
 }
 
 export function AccountFormSheet({ account, workspace, onClose, onSaved }: AccountFormSheetProps) {
+  const { t } = useTranslation()
   const isConnected = !!account?.connection_id
   const [currenciesList, setCurrenciesList] = useState<CurrencyInfo[]>([])
   const [name, setName] = useState(account?.name ?? '')
@@ -83,7 +85,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
       }
       onSaved()
     } catch {
-      setError('Could not save the account')
+      setError(t('accounts.errSave'))
       setBusy(false)
     }
   }
@@ -97,16 +99,16 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
       <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">
-            {account ? 'Edit account' : 'Add account'}
+            {account ? t('accounts.editTitle') : t('accounts.addTitle')}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="text-muted-foreground">
+          <button type="button" onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
           <label className="block">
-            <span className={labelClass}>Account name</span>
+            <span className={labelClass}>{t('accounts.name')}</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -118,7 +120,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
 
           {isConnected && (
             <label className="block">
-              <span className={labelClass}>Display name</span>
+              <span className={labelClass}>{t('accounts.displayName')}</span>
               <input
                 value={displayName}
                 onChange={(event) => setDisplayName(event.target.value)}
@@ -126,14 +128,14 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
                 className={inputClass}
               />
               <span className="mt-1 block text-xs text-muted-foreground">
-                Shown instead of the bank's name for this account
+                {t('accounts.displayNameHint')}
               </span>
             </label>
           )}
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className={labelClass}>Type</span>
+              <span className={labelClass}>{t('accounts.type')}</span>
               <select
                 value={type}
                 onChange={(event) => setType(event.target.value)}
@@ -141,14 +143,14 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
               >
                 {ACCOUNT_TYPE_OPTIONS.map((option) => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.label)}
                   </option>
                 ))}
               </select>
             </label>
             {!isConnected && (
               <label className="block">
-                <span className={labelClass}>Currency</span>
+                <span className={labelClass}>{t('accounts.currency')}</span>
                 <select
                   value={currency}
                   onChange={(event) => setCurrency(event.target.value)}
@@ -171,7 +173,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
                 <span className={labelClass}>
-                  {isCreditCard ? 'Current debt' : 'Balance'}
+                  {isCreditCard ? t('accounts.currentDebt') : t('accounts.balance')}
                 </span>
                 <input
                   type="number"
@@ -183,7 +185,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
                 />
               </label>
               <label className="block">
-                <span className={labelClass}>As of</span>
+                <span className={labelClass}>{t('accounts.asOf')}</span>
                 <input
                   type="date"
                   value={balanceDate}
@@ -198,7 +200,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
           {isCreditCard && (
             <div className="space-y-3 rounded-xl border border-border bg-background/50 p-3">
               <label className="block">
-                <span className={labelClass}>Credit limit</span>
+                <span className={labelClass}>{t('accounts.creditLimit')}</span>
                 <input
                   type="number"
                   step="0.01"
@@ -211,7 +213,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <label className="block">
-                  <span className={labelClass}>Statement close day</span>
+                  <span className={labelClass}>{t('accounts.statementCloseDay')}</span>
                   <input
                     type="number"
                     min="1"
@@ -223,7 +225,7 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
                   />
                 </label>
                 <label className="block">
-                  <span className={labelClass}>Payment due day</span>
+                  <span className={labelClass}>{t('accounts.paymentDueDay')}</span>
                   <input
                     type="number"
                     min="1"
@@ -250,14 +252,14 @@ export function AccountFormSheet({ account, workspace, onClose, onSaved }: Accou
               onClick={onClose}
               className="flex-1 rounded-xl border border-border py-3 text-sm text-muted-foreground"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={busy}
               className="flex-1 rounded-xl bg-primary py-3 font-semibold text-primary-foreground disabled:opacity-50"
             >
-              {busy ? 'Saving…' : 'Save'}
+              {busy ? t('common.saving') : t('common.save')}
             </button>
           </div>
         </form>

@@ -3,15 +3,16 @@ import { Building2, CreditCard, PiggyBank, TrendingUp, Wallet } from 'lucide-rea
 import type { Account } from './types'
 
 // securo's ACCOUNT_TYPE_CONFIG (account-icon.tsx), verbatim classes.
+// `label` is an i18n key, as in securo's ACCOUNT_TYPE_OPTIONS.
 export const ACCOUNT_TYPE_CONFIG: Record<
   string,
   { icon: ElementType; color: string; bg: string; label: string }
 > = {
-  checking:    { icon: Building2,  color: 'text-indigo-600',  bg: 'bg-indigo-100',  label: 'Checking' },
-  savings:     { icon: PiggyBank,  color: 'text-emerald-600', bg: 'bg-emerald-100', label: 'Savings' },
-  credit_card: { icon: CreditCard, color: 'text-violet-600',  bg: 'bg-violet-100',  label: 'Credit card' },
-  investment:  { icon: TrendingUp, color: 'text-amber-600',   bg: 'bg-amber-100',   label: 'Investment' },
-  wallet:      { icon: Wallet,     color: 'text-rose-600',    bg: 'bg-rose-100',    label: 'Wallet' },
+  checking:    { icon: Building2,  color: 'text-indigo-600',  bg: 'bg-indigo-100',  label: 'accounts.typeChecking' },
+  savings:     { icon: PiggyBank,  color: 'text-emerald-600', bg: 'bg-emerald-100', label: 'accounts.typeSavings' },
+  credit_card: { icon: CreditCard, color: 'text-violet-600',  bg: 'bg-violet-100',  label: 'accounts.typeCreditCard' },
+  investment:  { icon: TrendingUp, color: 'text-amber-600',   bg: 'bg-amber-100',   label: 'accounts.typeInvestment' },
+  wallet:      { icon: Wallet,     color: 'text-rose-600',    bg: 'bg-rose-100',    label: 'accounts.typeWallet' },
 }
 
 export const ACCOUNT_TYPE_OPTIONS = Object.entries(ACCOUNT_TYPE_CONFIG).map(

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, pairDevice, parseQrPayload } from '../lib/api'
 import { defaultDeviceName, hasNativeScanner, suggestedDeviceName } from '../lib/platform'
@@ -9,6 +10,7 @@ interface PairScreenProps {
 }
 
 export function PairScreen({ onPaired }: PairScreenProps) {
+  const { t } = useTranslation()
   const [deviceName, setDeviceName] = useState(defaultDeviceName())
   const [scanning, setScanning] = useState(false)
   const [showManual, setShowManual] = useState(false)
@@ -72,7 +74,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
         permission = await scanner.requestPermissions()
       }
       if (permission !== 'granted') {
-        setError('Camera permission denied — use manual entry below')
+        setError(t('pair.cameraDenied'))
         return
       }
       setNativeScanning(true)
@@ -81,7 +83,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
       handleScanContent(result.content)
     } catch {
       if (!scanCancelledRef.current) {
-        setError('Scan cancelled or failed — try again or use manual entry')
+        setError(t('pair.scanFailed'))
       }
     } finally {
       setNativeScanning(false)
@@ -103,7 +105,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center">
         <p className="mb-8 rounded-full bg-black/60 px-5 py-2.5 text-sm font-medium text-white">
-          Point at the Securo QR code
+          {t('pair.pointAtQr')}
         </p>
         {/* Transparent window: the shadow dims everything outside it while the
             camera stays visible through the center. */}
@@ -116,7 +118,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
           onClick={() => void cancelNativeScan()}
           className="mt-10 rounded-full bg-black/60 px-7 py-2.5 text-sm text-white"
         >
-          Cancel
+          {t('common.cancel')}
         </button>
       </div>
     )
@@ -126,15 +128,14 @@ export function PairScreen({ onPaired }: PairScreenProps) {
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col justify-center gap-6 p-6">
       <div className="text-center">
         <img src="/pwa-192.png" alt="" className="mx-auto mb-4 size-20 rounded-2xl" />
-        <h1 className="text-2xl font-semibold text-foreground">Pair with Securo</h1>
+        <h1 className="text-2xl font-semibold text-foreground">{t('pair.title')}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Open <span className="text-foreground">Settings → Devices</span> on your Securo instance
-          and scan the pairing QR code.
+          {t('pair.subtitle')}
         </p>
       </div>
 
       <label className="block text-left">
-        <span className="mb-1.5 block text-sm text-muted-foreground">This device's name</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">{t('pair.deviceName')}</span>
         <input
           value={deviceName}
           onChange={(event) => {
@@ -154,7 +155,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
             onClick={() => setScanning(false)}
             className="w-full rounded-xl border border-border py-3 text-muted-foreground"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
         </div>
       ) : (
@@ -164,7 +165,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
           onClick={() => (hasNativeScanner() ? void handleNativeScan() : setScanning(true))}
           className="w-full rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground disabled:opacity-50"
         >
-          {busy ? 'Pairing…' : 'Scan QR code'}
+          {busy ? t('pair.pairing') : t('pair.scanQr')}
         </button>
       )}
 
@@ -173,7 +174,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
         onClick={() => setShowManual((value) => !value)}
         className="text-sm text-muted-foreground underline-offset-4 hover:underline"
       >
-        {showManual ? 'Hide manual entry' : 'Enter code manually instead'}
+        {showManual ? t('pair.hideManual') : t('pair.showManual')}
       </button>
 
       {showManual && (
@@ -195,7 +196,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
           <input
             value={manualCode}
             onChange={(event) => setManualCode(event.target.value)}
-            placeholder="Pairing code"
+            placeholder={t('pair.codePlaceholder')}
             required
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
           />
@@ -204,7 +205,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
             disabled={busy}
             className="w-full rounded-xl border border-primary py-3 font-semibold text-primary disabled:opacity-50"
           >
-            Pair manually
+            {t('pair.pairManually')}
           </button>
         </form>
       )}
@@ -214,7 +215,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
           <p>{error}</p>
           {errorDetails && (
             <details className="mt-2">
-              <summary className="cursor-pointer text-xs opacity-80">Show details</summary>
+              <summary className="cursor-pointer text-xs opacity-80">{t('pair.showDetails')}</summary>
               <pre className="mt-2 max-h-48 select-text overflow-auto whitespace-pre-wrap break-all rounded-lg bg-black/20 p-2 text-left font-mono text-[11px] leading-snug">
                 {errorDetails}
               </pre>

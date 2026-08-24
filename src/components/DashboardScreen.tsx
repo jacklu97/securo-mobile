@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { ChevronsUpDown, Eye, EyeOff } from 'lucide-react'
 import { formatMoney } from '../lib/format'
@@ -15,6 +16,7 @@ interface DashboardScreenProps {
 }
 
 export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: DashboardScreenProps) {
+  const { t } = useTranslation()
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
   const [hidden, setHidden] = useState(() => localStorage.getItem('securo_privacy') === '1')
   const [spending, setSpending] = useState<SpendingByCategory[]>([])
@@ -48,7 +50,7 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
       <header className="flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-foreground">Home</h1>
+        <h1 className="text-xl font-semibold text-foreground">{t('tabs.home')}</h1>
         {workspace && (
           <button
             type="button"
@@ -76,17 +78,17 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
 
       {error && (
         <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
-          Could not load the dashboard.
+          {t('home.couldNotLoad')}
         </p>
       )}
 
       <section className="rounded-2xl border border-border bg-card p-5">
         <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">Total balance</p>
+          <p className="text-sm text-muted-foreground">{t('home.totalBalance')}</p>
           <button
             type="button"
             onClick={toggleHidden}
-            aria-label={hidden ? 'Show amounts' : 'Hide amounts'}
+            aria-label={hidden ? t('home.showAmounts') : t('home.hideAmounts')}
             className="p-1 text-muted-foreground"
           >
             {hidden ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -97,21 +99,20 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
         </p>
         {summary && summary.pending_categorization > 0 && (
           <p className="mt-2 text-xs text-amber-600 dark:text-amber-300">
-            {summary.pending_categorization} transaction
-            {summary.pending_categorization === 1 ? '' : 's'} to categorize
+            {t('home.toCategorize', { count: summary.pending_categorization })}
           </p>
         )}
       </section>
 
       <section className="grid grid-cols-2 gap-4">
         <div className="rounded-2xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Income this month</p>
+          <p className="text-xs text-muted-foreground">{t('home.income')}</p>
           <p className="mt-1 text-lg font-medium text-emerald-600 dark:text-emerald-400">
             {summary ? mask(formatMoney(summary.monthly_income_primary, currency)) : '—'}
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-4">
-          <p className="text-xs text-muted-foreground">Spent this month</p>
+          <p className="text-xs text-muted-foreground">{t('home.spent')}</p>
           <p className="mt-1 text-lg font-medium text-rose-500">
             {summary ? mask(formatMoney(summary.monthly_expenses_primary, currency)) : '—'}
           </p>
@@ -120,14 +121,14 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
 
       {spending.length > 0 && (
         <section className="rounded-2xl border border-border bg-card p-4">
-          <h2 className="mb-3 text-sm font-medium text-muted-foreground">Spending by category</h2>
+          <h2 className="mb-3 text-sm font-medium text-muted-foreground">{t('home.spendingByCategory')}</h2>
           <ul className="space-y-3">
             {spending.slice(0, 8).map((row) => (
               <li key={row.category_id ?? 'uncategorized'}>
                 <div className="mb-1 flex items-center justify-between text-sm">
                   <span className="flex min-w-0 items-center gap-2 text-foreground">
                     <CategoryIcon icon={row.category_icon} color={row.category_color} size={20} />
-                    <span className="truncate">{row.category_id === null ? 'Uncategorized' : row.category_name}</span>
+                    <span className="truncate">{row.category_id === null ? t('home.uncategorized') : row.category_name}</span>
                   </span>
                   <span className="ml-3 shrink-0 text-muted-foreground">
                     {mask(formatMoney(row.total, currency))}

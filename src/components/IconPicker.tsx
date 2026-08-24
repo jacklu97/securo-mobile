@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useMemo, useState } from 'react'
 import { CATEGORY_ICONS } from '../lib/category-icons'
 
@@ -9,6 +10,7 @@ interface IconPickerProps {
 
 /** Ported from securo's icon-picker.tsx: searchable grid over CATEGORY_ICONS. */
 export function IconPicker({ value, color, onChange }: IconPickerProps) {
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
   const filtered = useMemo(() => {
@@ -23,7 +25,7 @@ export function IconPicker({ value, color, onChange }: IconPickerProps) {
     <div className="space-y-2">
       <input
         type="text"
-        placeholder="Search icon"
+        placeholder={t('categories.searchIcon')}
         value={search}
         onChange={(event) => setSearch(event.target.value)}
         className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm text-foreground outline-none focus:border-primary"
@@ -53,7 +55,7 @@ export function IconPicker({ value, color, onChange }: IconPickerProps) {
         })}
         {filtered.length === 0 && (
           <p className="col-span-8 py-4 text-center text-xs text-muted-foreground">
-            No icons found
+            {t('categories.noIcons')}
           </p>
         )}
       </div>

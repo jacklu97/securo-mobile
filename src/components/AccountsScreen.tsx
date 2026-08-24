@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useState } from 'react'
 import { Plus, Trash2, X } from 'lucide-react'
 import {
@@ -17,6 +18,7 @@ interface AccountsScreenProps {
 }
 
 export function AccountsScreen({ workspace }: AccountsScreenProps) {
+  const { t } = useTranslation()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -57,20 +59,20 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-foreground">Accounts</h1>
+        <h1 className="text-xl font-semibold text-foreground">{t('tabs.accounts')}</h1>
         <button
           type="button"
           onClick={() => setFormAccount('new')}
           className="flex items-center gap-1.5 rounded-xl bg-primary px-3.5 py-2 text-sm font-semibold text-primary-foreground"
         >
           <Plus size={16} />
-          Add
+          {t('common.add')}
         </button>
       </header>
 
       {error && (
         <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
-          Something went wrong — pull the list again or retry.
+          {t('accounts.error')}
         </p>
       )}
 
@@ -95,7 +97,7 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
                     {getAccountName(account)}
                   </span>
                   <span className="block text-xs text-muted-foreground">
-                    {config.label}
+                    {t(config.label)}
                     {mask ? ` · ${mask}` : ''}
                     {account.institution_name ? ` · ${account.institution_name}` : ''}
                   </span>
@@ -117,13 +119,13 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
                     disabled={isDeleting}
                     className="rounded-lg bg-destructive/15 px-2.5 py-1.5 text-xs font-medium text-destructive disabled:opacity-50"
                   >
-                    {isDeleting ? '…' : 'Delete'}
+                    {isDeleting ? '…' : t('common.delete')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setConfirmDeleteId(null)}
                     disabled={isDeleting}
-                    aria-label="Cancel"
+                    aria-label={t('common.cancel')}
                     className="p-1.5 text-muted-foreground"
                   >
                     <X size={14} />
@@ -133,7 +135,7 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
                 <button
                   type="button"
                   onClick={() => setConfirmDeleteId(account.id)}
-                  aria-label={`Delete ${getAccountName(account)}`}
+                  aria-label={`${t('common.delete')} ${getAccountName(account)}`}
                   className="shrink-0 p-1.5 text-muted-foreground hover:text-destructive"
                 >
                   <Trash2 size={16} />
@@ -144,11 +146,11 @@ export function AccountsScreen({ workspace }: AccountsScreenProps) {
         })}
         {!loading && accounts.length === 0 && !error && (
           <li className="px-4 py-8 text-center text-sm text-muted-foreground">
-            No accounts yet — add your first one
+            {t('accounts.empty')}
           </li>
         )}
         {loading && (
-          <li className="px-4 py-8 text-center text-sm text-muted-foreground">Loading…</li>
+          <li className="px-4 py-8 text-center text-sm text-muted-foreground">{t('common.loading')}</li>
         )}
       </ul>
 
