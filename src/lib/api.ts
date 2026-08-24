@@ -58,6 +58,12 @@ export async function pairDevice(
   code: string,
   name: string,
 ): Promise<DeviceCredentials> {
+  // Web flavor (PWA/browser): always pair against our own origin. The QR's
+  // URL may point at the securo UI's domain, which would be cross-origin for
+  // browser fetch; our origin proxies /api to the same backend, so only the
+  // code matters. Native builds keep the scanned URL — they have no origin
+  // and tauri-plugin-http is CORS-free.
+  if (!isTauri()) instanceUrl = window.location.origin
   const url = `${apiBase(instanceUrl)}/devices/pair`
   let response: Response
   try {
