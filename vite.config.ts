@@ -36,6 +36,11 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true,
+    // Web flavor talks to its own origin; in dev that origin is vite, so
+    // forward /api to the local securo instance.
+    proxy: {
+      '/api': 'http://localhost:3000',
+    },
     host: host || false,
     hmr: host ? { protocol: 'ws', host, port: 5183 } : undefined,
     watch: {

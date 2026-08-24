@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 import { ApiError, pairDevice, parseQrPayload } from '../lib/api'
-import { defaultDeviceName, hasNativeScanner, suggestedDeviceName } from '../lib/platform'
+import { defaultDeviceName, hasNativeScanner, isTauri, suggestedDeviceName } from '../lib/platform'
 import type { DeviceCredentials } from '../lib/types'
 import { QrWebScanner } from './QrWebScanner'
 
@@ -14,7 +14,8 @@ export function PairScreen({ onPaired }: PairScreenProps) {
   const [deviceName, setDeviceName] = useState(defaultDeviceName())
   const [scanning, setScanning] = useState(false)
   const [showManual, setShowManual] = useState(false)
-  const [manualUrl, setManualUrl] = useState('')
+  // Web flavor always pairs against its own origin (see pairDevice).
+  const [manualUrl, setManualUrl] = useState(() => (isTauri() ? '' : window.location.origin))
   const [manualCode, setManualCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -191,6 +192,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
             placeholder="https://securo.example.com"
             type="url"
             required
+            readOnly={!isTauri()}
             className="w-full rounded-xl border border-border bg-card px-4 py-3 text-foreground outline-none focus:border-primary"
           />
           <input
