@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { pairDevice, parseQrPayload } from '../lib/api'
+import { ApiError, pairDevice, parseQrPayload } from '../lib/api'
 import { defaultDeviceName, hasNativeScanner } from '../lib/platform'
 import type { DeviceCredentials } from '../lib/types'
 import { QrWebScanner } from './QrWebScanner'
@@ -16,14 +16,17 @@ export function PairScreen({ onPaired }: PairScreenProps) {
   const [manualCode, setManualCode] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorDetails, setErrorDetails] = useState<string | null>(null)
 
   const pair = async (url: string, code: string) => {
     setBusy(true)
     setError(null)
+    setErrorDetails(null)
     try {
       onPaired(await pairDevice(url, code, deviceName.trim() || defaultDeviceName()))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Pairing failed')
+      setErrorDetails(err instanceof ApiError ? (err.details ?? null) : null)
     } finally {
       setBusy(false)
     }
@@ -36,6 +39,7 @@ export function PairScreen({ onPaired }: PairScreenProps) {
       void pair(payload.url, payload.code)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid QR code')
+      setErrorDetails(`Scanned content:\n${content.slice(0, 400)}`)
     }
   }
 
@@ -143,9 +147,17 @@ export function PairScreen({ onPaired }: PairScreenProps) {
       )}
 
       {error && (
-        <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
-          {error}
-        </p>
+        <div className="rounded-xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+          <p>{error}</p>
+          {errorDetails && (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs opacity-80">Show details</summary>
+              <pre className="mt-2 max-h-48 select-text overflow-auto whitespace-pre-wrap break-all rounded-lg bg-black/20 p-2 text-left font-mono text-[11px] leading-snug">
+                {errorDetails}
+              </pre>
+            </details>
+          )}
+        </div>
       )}
     </div>
   )

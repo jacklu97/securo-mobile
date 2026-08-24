@@ -11,10 +11,13 @@ const doFetch: typeof fetch = (...args) => (isTauri() ? tauriFetch(...args) : fe
 
 export class ApiError extends Error {
   status: number
+  /** Raw diagnostics (URL, status, response body / network error) for debugging. */
+  details?: string
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, details?: string) {
     super(message)
     this.status = status
+    this.details = details
   }
 }
 
@@ -41,20 +44,49 @@ export async function pairDevice(
   code: string,
   name: string,
 ): Promise<DeviceCredentials> {
-  const response = await doFetch(`${apiBase(instanceUrl)}/devices/pair`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      code,
-      name,
-      platform: devicePlatform(),
-      app_version: APP_VERSION,
-    }),
-  })
-  if (!response.ok) {
-    throw new ApiError(response.status, 'Pairing failed — the code may be invalid or expired')
+  const url = `${apiBase(instanceUrl)}/devices/pair`
+  let response: Response
+  try {
+    response = await doFetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        code,
+        name,
+        platform: devicePlatform(),
+        app_version: APP_VERSION,
+      }),
+    })
+  } catch (err) {
+    throw new ApiError(
+      0,
+      'Could not reach the instance — check the URL and that it is reachable from this device',
+      `POST ${url}\n${err instanceof Error ? `${err.name}: ${err.message}` : String(err)}`,
+    )
   }
-  const data = (await response.json()) as PairResponse
+  const bodyText = await response.text().catch(() => '')
+  if (!response.ok) {
+    // Non-2xx often isn't securo at all (tunnel auth pages, proxies) — keep
+    // the raw body so the real responder is identifiable.
+    throw new ApiError(
+      response.status,
+      response.status === 400
+        ? 'Pairing failed — the code may be invalid or expired'
+        : `Pairing failed — the instance answered HTTP ${response.status}`,
+      `POST ${url}\nHTTP ${response.status}\n${bodyText.slice(0, 800)}`,
+    )
+  }
+  let data: PairResponse
+  try {
+    data = JSON.parse(bodyText) as PairResponse
+  } catch {
+    // 200 but not JSON: something (e.g. a tunnel interstitial) intercepted us.
+    throw new ApiError(
+      response.status,
+      'The URL responded, but not with a Securo pairing response',
+      `POST ${url}\nHTTP ${response.status}\n${bodyText.slice(0, 800)}`,
+    )
+  }
   const creds: DeviceCredentials = {
     instanceUrl: instanceUrl.replace(/\/+$/, ''),
     deviceId: data.device_id,
