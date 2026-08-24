@@ -13,11 +13,25 @@ export class ApiError extends Error {
   status: number
   /** Raw diagnostics (URL, status, response body / network error) for debugging. */
   details?: string
+  /** Connectivity/gateway trouble (network error, non-JSON responder, 5xx) as
+   *  opposed to a definitive securo rejection. Transient errors must never
+   *  destroy local state like the pairing. */
+  transient: boolean
 
-  constructor(status: number, message: string, details?: string) {
+  constructor(status: number, message: string, details?: string, transient = false) {
     super(message)
     this.status = status
     this.details = details
+    this.transient = transient
+  }
+}
+
+function looksLikeJson(text: string): boolean {
+  try {
+    JSON.parse(text)
+    return true
+  } catch {
+    return false
   }
 }
 
@@ -99,17 +113,36 @@ export async function pairDevice(
 }
 
 async function refreshTokens(creds: DeviceCredentials): Promise<DeviceCredentials> {
-  const response = await doFetch(`${apiBase(creds.instanceUrl)}/devices/token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh_token: creds.refreshToken }),
-  })
-  if (!response.ok) {
-    // Refresh token revoked or expired: the pairing is dead.
-    clearCredentials()
-    throw new ApiError(response.status, 'Session expired — pair this device again')
+  const url = `${apiBase(creds.instanceUrl)}/devices/token`
+  let response: Response
+  try {
+    response = await doFetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: creds.refreshToken }),
+    })
+  } catch (err) {
+    throw new ApiError(0, 'Cannot reach the instance', String(err), true)
   }
-  const data = (await response.json()) as PairResponse
+  const bodyText = await response.text().catch(() => '')
+  if (!response.ok) {
+    // Only a definitive JSON rejection from securo kills the pairing. A
+    // tunnel/proxy answering with an HTML error page (or a 5xx) is
+    // connectivity trouble and must leave the credentials intact.
+    const definitive =
+      [400, 401, 403].includes(response.status) && looksLikeJson(bodyText)
+    if (definitive) {
+      clearCredentials()
+      throw new ApiError(response.status, 'Session expired — pair this device again')
+    }
+    throw new ApiError(
+      response.status,
+      'The instance is not reachable right now',
+      `POST ${url}\nHTTP ${response.status}\n${bodyText.slice(0, 300)}`,
+      true,
+    )
+  }
+  const data = JSON.parse(bodyText) as PairResponse
   const next: DeviceCredentials = {
     ...creds,
     accessToken: data.access_token,
@@ -127,24 +160,42 @@ export async function authedFetch(path: string, init: RequestInit = {}): Promise
   if (!creds) throw new ApiError(401, 'Not paired')
 
   const workspaceId = localStorage.getItem(WORKSPACE_STORAGE_KEY)
-  const send = (token: string) =>
-    doFetch(`${apiBase(creds!.instanceUrl)}${path}`, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(workspaceId ? { 'X-Workspace-Id': workspaceId } : {}),
-        ...init.headers,
-        Authorization: `Bearer ${token}`,
-      },
-    })
+  const send = async (token: string) => {
+    try {
+      return await doFetch(`${apiBase(creds!.instanceUrl)}${path}`, {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(workspaceId ? { 'X-Workspace-Id': workspaceId } : {}),
+          ...init.headers,
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    } catch (err) {
+      throw new ApiError(0, 'Cannot reach the instance', `${path}\n${String(err)}`, true)
+    }
+  }
 
   let response = await send(creds.accessToken)
   if (response.status === 401) {
+    const bodyText = await response.text().catch(() => '')
+    if (!looksLikeJson(bodyText)) {
+      // A non-JSON 401 is a gateway (e.g. a private tunnel), not securo —
+      // refreshing against it would falsely kill the pairing.
+      throw new ApiError(401, 'The instance is not reachable right now', bodyText.slice(0, 300), true)
+    }
     creds = await refreshTokens(creds)
     response = await send(creds.accessToken)
   }
   if (!response.ok) {
-    throw new ApiError(response.status, `Request failed (${response.status})`)
+    const bodyText = await response.text().catch(() => '')
+    const transient = !looksLikeJson(bodyText) || response.status >= 500
+    throw new ApiError(
+      response.status,
+      `Request failed (${response.status})`,
+      `${path}\nHTTP ${response.status}\n${bodyText.slice(0, 300)}`,
+      transient,
+    )
   }
   return response
 }
