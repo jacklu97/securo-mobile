@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { todayIso } from '../lib/format'
 import { submitTransaction } from '../lib/outbox'
@@ -10,6 +11,7 @@ interface AddTransactionScreenProps {
 }
 
 export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScreenProps) {
+  const { t } = useTranslation()
   const [accounts, setAccounts] = useState<Account[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [type, setType] = useState<'debit' | 'credit'>('debit')
@@ -29,7 +31,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
         setAccounts(open)
         setAccountId((current) => current || (open[0]?.id ?? ''))
       })
-      .catch(() => setError('Could not load accounts'))
+      .catch(() => setError(t('tx.errAccounts')))
     listCategories()
       .then((list) => setCategories(list.filter((category) => !category.is_ignored)))
       .catch(() => {})
@@ -39,7 +41,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
     event.preventDefault()
     const value = Number.parseFloat(amount)
     if (!Number.isFinite(value) || value <= 0) {
-      setError('Enter an amount greater than zero')
+      setError(t('tx.errAmount'))
       return
     }
     setBusy(true)
@@ -59,7 +61,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       setDate(todayIso())
       onSaved()
     } catch {
-      setError('Could not save the transaction')
+      setError(t('tx.errSave'))
     } finally {
       setBusy(false)
     }
@@ -70,7 +72,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
 
   return (
     <form onSubmit={(event) => void handleSubmit(event)} className="flex flex-col gap-4 p-4 pt-6">
-      <h1 className="text-xl font-semibold text-foreground">Add transaction</h1>
+      <h1 className="text-xl font-semibold text-foreground">{t('tx.addTitle')}</h1>
 
       <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-border">
         {(['debit', 'credit'] as const).map((option) => (
@@ -82,13 +84,13 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
               type === option ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground'
             }`}
           >
-            {option === 'debit' ? 'Expense' : 'Income'}
+            {option === 'debit' ? t('tx.expense') : t('tx.income')}
           </button>
         ))}
       </div>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-muted-foreground">Amount</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">{t('tx.amount')}</span>
         <input
           value={amount}
           onChange={(event) => setAmount(event.target.value)}
@@ -100,11 +102,11 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-muted-foreground">Description</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">{t('tx.description')}</span>
         <input
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          placeholder="Coffee, groceries…"
+          placeholder={t('tx.descriptionPlaceholder')}
           required
           maxLength={200}
           className={inputClass}
@@ -112,7 +114,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-muted-foreground">Date</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">{t('tx.date')}</span>
         <input
           type="date"
           value={date}
@@ -123,7 +125,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-muted-foreground">Account</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">{t('tx.account')}</span>
         <select
           value={accountId}
           onChange={(event) => setAccountId(event.target.value)}
@@ -140,13 +142,13 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
       </label>
 
       <label className="block">
-        <span className="mb-1.5 block text-sm text-muted-foreground">Category (optional)</span>
+        <span className="mb-1.5 block text-sm text-muted-foreground">{t('tx.categoryOptional')}</span>
         <select
           value={categoryId}
           onChange={(event) => setCategoryId(event.target.value)}
           className={inputClass}
         >
-          <option value="">Uncategorized</option>
+          <option value="">{t('home.uncategorized')}</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -166,7 +168,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
         disabled={busy || !accountId}
         className="rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground disabled:opacity-50"
       >
-        {busy ? 'Saving…' : 'Save transaction'}
+        {busy ? t('common.saving') : t('tx.save')}
       </button>
     </form>
   )

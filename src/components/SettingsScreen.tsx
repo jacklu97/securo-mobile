@@ -1,15 +1,17 @@
+import { useTranslation } from 'react-i18next'
 import { useCallback, useEffect, useState } from 'react'
-import { Check, ChevronRight, Monitor, Moon, Pencil, Sun, Tags } from 'lucide-react'
+import { Check, ChevronRight, Languages, Monitor, Moon, Pencil, Sun, Tags } from 'lucide-react'
 import { ApiError, getCurrentUser, renameDevice, sendHeartbeat, unpairDevice } from '../lib/api'
 import { clearCredentials } from '../lib/storage'
 import { loadThemePreference, setThemePreference, type ThemePreference } from '../lib/theme'
+import { LANGUAGES, currentLanguage, setLanguage } from '../lib/i18n'
 import { CategoriesSheet } from './CategoriesSheet'
 import type { CurrentUser, DeviceCredentials } from '../lib/types'
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; icon: typeof Sun }[] = [
-  { value: 'light', label: 'Light', icon: Sun },
-  { value: 'dark', label: 'Dark', icon: Moon },
-  { value: 'system', label: 'System', icon: Monitor },
+const THEME_OPTIONS: { value: ThemePreference; labelKey: string; icon: typeof Sun }[] = [
+  { value: 'light', labelKey: 'settings.light', icon: Sun },
+  { value: 'dark', labelKey: 'settings.dark', icon: Moon },
+  { value: 'system', labelKey: 'settings.system', icon: Monitor },
 ]
 
 const HEARTBEAT_MS = 30_000
@@ -22,6 +24,7 @@ interface SettingsScreenProps {
 type Status = 'connecting' | 'connected' | 'offline'
 
 export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<Status>('connecting')
   const [user, setUser] = useState<CurrentUser | null>(null)
   const [theme, setTheme] = useState<ThemePreference>(loadThemePreference)
@@ -99,7 +102,7 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
       <header className="flex items-center gap-3 pt-4">
         <img src="/pwa-192.png" alt="" className="size-10 rounded-xl" />
         <div className="flex-1">
-          <h1 className="text-lg font-semibold text-foreground">Settings</h1>
+          <h1 className="text-lg font-semibold text-foreground">{t('tabs.settings')}</h1>
           {editingName ? (
             <span className="mt-0.5 flex items-center gap-1.5">
               <input
@@ -114,7 +117,7 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
                 type="button"
                 onClick={() => void saveName()}
                 disabled={savingName}
-                aria-label="Save name"
+                aria-label={t('settings.saveName')}
                 className="p-1 text-primary disabled:opacity-50"
               >
                 <Check size={14} />
@@ -152,20 +155,20 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
                   : 'bg-muted-foreground animate-pulse'
             }`}
           />
-          {status === 'connected' ? 'Connected' : status === 'offline' ? 'Offline' : 'Connecting'}
+          {status === 'connected' ? t('settings.connected') : status === 'offline' ? t('settings.offline') : t('settings.connecting')}
         </span>
       </header>
 
       <section className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Paired instance</h2>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">{t('settings.pairedInstance')}</h2>
         <dl className="space-y-2 text-sm">
           <div className="flex justify-between gap-4">
-            <dt className="text-muted-foreground">Instance</dt>
+            <dt className="text-muted-foreground">{t('settings.instance')}</dt>
             <dd className="truncate text-foreground">{creds.instanceUrl}</dd>
           </div>
           {user && (
             <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">Account</dt>
+              <dt className="text-muted-foreground">{t('settings.account')}</dt>
               <dd className="truncate text-foreground">{user.email}</dd>
             </div>
           )}
@@ -173,9 +176,9 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Appearance</h2>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">{t('settings.appearance')}</h2>
         <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-border">
-          {THEME_OPTIONS.map(({ value, label, icon: Icon }) => (
+          {THEME_OPTIONS.map(({ value, labelKey, icon: Icon }) => (
             <button
               key={value}
               type="button"
@@ -190,21 +193,39 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
               }`}
             >
               <Icon size={15} />
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
       </section>
 
       <section className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="mb-3 text-sm font-medium text-muted-foreground">Workspace</h2>
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">{t('settings.language')}</h2>
+        <div className="flex items-center gap-3 rounded-xl border border-border px-4 py-1.5">
+          <Languages size={18} className="shrink-0 text-primary" />
+          <select
+            value={currentLanguage()}
+            onChange={(event) => setLanguage(event.target.value)}
+            className="w-full bg-transparent py-1.5 text-sm text-foreground outline-none"
+          >
+            {LANGUAGES.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="mb-3 text-sm font-medium text-muted-foreground">{t('settings.workspaceSection')}</h2>
         <button
           type="button"
           onClick={() => setShowCategories(true)}
           className="flex w-full items-center gap-3 rounded-xl border border-border px-4 py-3 text-left"
         >
           <Tags size={18} className="text-primary" />
-          <span className="flex-1 text-sm text-foreground">Manage categories</span>
+          <span className="flex-1 text-sm text-foreground">{t('settings.manageCategories')}</span>
           <ChevronRight size={16} className="text-muted-foreground" />
         </button>
       </section>
@@ -217,7 +238,7 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
         disabled={unpairing}
         className="w-full rounded-xl border border-destructive/40 py-3 text-sm text-destructive disabled:opacity-50"
       >
-        {unpairing ? 'Unpairing…' : 'Unpair this device'}
+        {unpairing ? t('settings.unpairing') : t('settings.unpair')}
       </button>
 
       {showCategories && <CategoriesSheet onClose={() => setShowCategories(false)} />}

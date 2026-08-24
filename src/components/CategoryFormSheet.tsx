@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import { createCategory, updateCategory } from '../lib/securo'
@@ -12,6 +13,7 @@ interface CategoryFormSheetProps {
 }
 
 export function CategoryFormSheet({ category, groups, onClose, onSaved }: CategoryFormSheetProps) {
+  const { t } = useTranslation()
   const [name, setName] = useState(category?.name ?? '')
   const [groupId, setGroupId] = useState(category?.group_id ?? '')
   // securo's dialog defaults: color #6366f1, icon circle-help
@@ -42,7 +44,7 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
       }
       onSaved()
     } catch {
-      setError('Could not save the category')
+      setError(t('categories.errSave'))
       setBusy(false)
     }
   }
@@ -56,16 +58,16 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
       <div className="max-h-[92dvh] w-full max-w-md overflow-y-auto rounded-t-2xl bg-card p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:rounded-2xl">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">
-            {category ? 'Edit category' : 'Add category'}
+            {category ? t('categories.editTitle') : t('categories.addTitle')}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="text-muted-foreground">
+          <button type="button" onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <X size={20} />
           </button>
         </div>
 
         <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4">
           <label className="block">
-            <span className={labelClass}>Name</span>
+            <span className={labelClass}>{t('categories.name')}</span>
             <input
               value={name}
               onChange={(event) => setName(event.target.value)}
@@ -77,13 +79,13 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className={labelClass}>Group</span>
+              <span className={labelClass}>{t('categories.group')}</span>
               <select
                 value={groupId}
                 onChange={(event) => setGroupId(event.target.value)}
                 className={inputClass}
               >
-                <option value="">No group</option>
+                <option value="">{t('categories.noGroup')}</option>
                 {groups.map((group) => (
                   <option key={group.id} value={group.id}>
                     {group.name}
@@ -92,7 +94,7 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
               </select>
             </label>
             <label className="block">
-              <span className={labelClass}>Color</span>
+              <span className={labelClass}>{t('categories.color')}</span>
               <input
                 type="color"
                 value={color}
@@ -104,7 +106,7 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
           </div>
 
           <div>
-            <span className={labelClass}>Icon</span>
+            <span className={labelClass}>{t('categories.icon')}</span>
             <IconPicker value={icon} color={color} onChange={setIcon} />
           </div>
 
@@ -116,9 +118,9 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
               className="size-4 accent-[var(--primary)]"
             />
             <span className="text-sm text-foreground">
-              Treat as transfer
+              {t('categories.treatAsTransfer')}
               <span className="block text-xs text-muted-foreground">
-                Excluded from income/expense totals
+                {t('categories.treatAsTransferHint')}
               </span>
             </span>
           </label>
@@ -131,9 +133,9 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
               className="size-4 accent-[var(--primary)]"
             />
             <span className="text-sm text-foreground">
-              Ignore in reports
+              {t('categories.ignoreInReports')}
               <span className="block text-xs text-muted-foreground">
-                Hidden from dashboards and summaries
+                {t('categories.ignoreInReportsHint')}
               </span>
             </span>
           </label>
@@ -150,14 +152,14 @@ export function CategoryFormSheet({ category, groups, onClose, onSaved }: Catego
               onClick={onClose}
               className="flex-1 rounded-xl border border-border py-3 text-sm text-muted-foreground"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={busy}
               className="flex-1 rounded-xl bg-primary py-3 font-semibold text-primary-foreground disabled:opacity-50"
             >
-              {busy ? 'Saving…' : 'Save'}
+              {busy ? t('common.saving') : t('common.save')}
             </button>
           </div>
         </form>

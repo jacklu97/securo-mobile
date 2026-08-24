@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useEffect, useState } from 'react'
 import { Home, Landmark, List, Plus, Settings } from 'lucide-react'
 import { CloudOff } from 'lucide-react'
@@ -13,12 +14,12 @@ import { TransactionsScreen } from './TransactionsScreen'
 
 type Tab = 'home' | 'activity' | 'add' | 'accounts' | 'settings'
 
-const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
-  { id: 'home', label: 'Home', icon: Home },
-  { id: 'activity', label: 'Activity', icon: List },
-  { id: 'add', label: 'Add', icon: Plus },
-  { id: 'accounts', label: 'Accounts', icon: Landmark },
-  { id: 'settings', label: 'Settings', icon: Settings },
+const TABS: { id: Tab; labelKey: string; icon: typeof Home }[] = [
+  { id: 'home', labelKey: 'tabs.home', icon: Home },
+  { id: 'activity', labelKey: 'tabs.activity', icon: List },
+  { id: 'add', labelKey: 'tabs.add', icon: Plus },
+  { id: 'accounts', labelKey: 'tabs.accounts', icon: Landmark },
+  { id: 'settings', labelKey: 'tabs.settings', icon: Settings },
 ]
 
 interface MainShellProps {
@@ -27,6 +28,7 @@ interface MainShellProps {
 }
 
 export function MainShell({ creds, onUnpaired }: MainShellProps) {
+  const { t } = useTranslation()
   const [tab, setTab] = useState<Tab>('home')
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [workspaceId, setWorkspaceId] = useState<string | null>(
@@ -77,14 +79,14 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
     return (
       <div className="mx-auto flex min-h-full w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Could not reach {creds.instanceUrl}. Check the connection and try again.
+          {t('shell.couldNotReach', { url: creds.instanceUrl })}
         </p>
         <button
           type="button"
           onClick={() => window.location.reload()}
           className="rounded-xl bg-primary px-6 py-3 font-semibold text-primary-foreground"
         >
-          Retry
+          {t('common.retry')}
         </button>
       </div>
     )
@@ -99,10 +101,7 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
           className="mx-4 mt-3 flex items-center gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 text-left text-xs text-amber-600 dark:text-amber-300"
         >
           <CloudOff size={15} className="shrink-0" />
-          <span className="flex-1">
-            {pending} pending {pending === 1 ? 'entry' : 'entries'} — will upload when the
-            instance is reachable. Tap to retry now.
-          </span>
+          <span className="flex-1">{t('outbox.pending', { count: pending })}</span>
         </button>
       )}
       <div className="flex-1 pb-20">
@@ -121,7 +120,7 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
 
       <nav className="fixed inset-x-0 bottom-0 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
         <div className="mx-auto flex w-full max-w-md">
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {TABS.map(({ id, labelKey, icon: Icon }) => (
             <button
               key={id}
               type="button"
@@ -131,7 +130,7 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
               }`}
             >
               <Icon size={20} strokeWidth={tab === id ? 2.4 : 1.8} />
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </div>
