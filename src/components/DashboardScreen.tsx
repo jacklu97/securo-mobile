@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { ChevronsUpDown, Eye, EyeOff } from 'lucide-react'
 import { formatMoney } from '../lib/format'
 import { CategoryIcon } from './CategoryIcon'
+import { WorkspaceIcon } from './WorkspaceIcon'
+import { WorkspaceSwitcherSheet } from './WorkspaceSwitcherSheet'
 import { onSyncComplete } from '../lib/outbox'
 import { getDashboardSummary, getSpendingByCategory } from '../lib/securo'
 import type { DashboardSummary, SpendingByCategory, Workspace } from '../lib/types'
@@ -19,6 +21,7 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
   const [error, setError] = useState(false)
 
   const [reloadKey, setReloadKey] = useState(0)
+  const [switcherOpen, setSwitcherOpen] = useState(false)
 
   useEffect(() => onSyncComplete(() => setReloadKey((k) => k + 1)), [])
 
@@ -46,20 +49,30 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
     <div className="flex flex-col gap-4 p-4 pt-6">
       <header className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-foreground">Home</h1>
-        {workspaces.length > 1 && (
-          <select
-            value={workspace?.id ?? ''}
-            onChange={(event) => onSelectWorkspace(event.target.value)}
-            className="rounded-lg border border-border bg-card px-2.5 py-1.5 text-sm text-foreground"
+        {workspace && (
+          <button
+            type="button"
+            onClick={() => setSwitcherOpen(true)}
+            className="flex max-w-[60%] items-center gap-2 rounded-xl border border-border bg-card py-1.5 pl-1.5 pr-2.5"
           >
-            {workspaces.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.icon ? `${item.icon} ` : ''}{item.name}
-              </option>
-            ))}
-          </select>
+            <WorkspaceIcon workspace={workspace} size={24} />
+            <span className="truncate text-sm text-foreground">{workspace.name}</span>
+            <ChevronsUpDown size={13} className="shrink-0 text-muted-foreground" />
+          </button>
         )}
       </header>
+
+      {switcherOpen && (
+        <WorkspaceSwitcherSheet
+          workspaces={workspaces}
+          currentId={workspace?.id ?? null}
+          onSelect={(id) => {
+            setSwitcherOpen(false)
+            onSelectWorkspace(id)
+          }}
+          onClose={() => setSwitcherOpen(false)}
+        />
+      )}
 
       {error && (
         <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-rose-500">
