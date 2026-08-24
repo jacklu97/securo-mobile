@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { formatMoney } from '../lib/format'
 import { CategoryIcon } from './CategoryIcon'
 import { getDashboardSummary, getSpendingByCategory } from '../lib/securo'
@@ -12,6 +13,7 @@ interface DashboardScreenProps {
 
 export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: DashboardScreenProps) {
   const [summary, setSummary] = useState<DashboardSummary | null>(null)
+  const [hidden, setHidden] = useState(() => localStorage.getItem('securo_privacy') === '1')
   const [spending, setSpending] = useState<SpendingByCategory[]>([])
   const [error, setError] = useState(false)
 
@@ -24,6 +26,16 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
   }, [workspace])
 
   const currency = summary?.primary_currency ?? workspace?.default_currency ?? 'USD'
+
+  const toggleHidden = () => {
+    setHidden((value) => {
+      localStorage.setItem('securo_privacy', value ? '0' : '1')
+      return !value
+    })
+  }
+
+  // Privacy mode: mask amounts but keep layout (same idea as securo's mask()).
+  const mask = (formatted: string) => (hidden ? '••••••' : formatted)
 
   return (
     <div className="flex flex-col gap-4 p-4 pt-6">
@@ -51,9 +63,19 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
       )}
 
       <section className="rounded-2xl border border-border bg-card p-5">
-        <p className="text-sm text-muted-foreground">Total balance</p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">Total balance</p>
+          <button
+            type="button"
+            onClick={toggleHidden}
+            aria-label={hidden ? 'Show amounts' : 'Hide amounts'}
+            className="p-1 text-muted-foreground"
+          >
+            {hidden ? <EyeOff size={17} /> : <Eye size={17} />}
+          </button>
+        </div>
         <p className="mt-1 text-3xl font-semibold text-foreground">
-          {summary ? formatMoney(summary.total_balance_primary, currency) : '—'}
+          {summary ? mask(formatMoney(summary.total_balance_primary, currency)) : '—'}
         </p>
         {summary && summary.pending_categorization > 0 && (
           <p className="mt-2 text-xs text-amber-600 dark:text-amber-300">
@@ -67,13 +89,13 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
         <div className="rounded-2xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Income this month</p>
           <p className="mt-1 text-lg font-medium text-emerald-600 dark:text-emerald-400">
-            {summary ? formatMoney(summary.monthly_income_primary, currency) : '—'}
+            {summary ? mask(formatMoney(summary.monthly_income_primary, currency)) : '—'}
           </p>
         </div>
         <div className="rounded-2xl border border-border bg-card p-4">
           <p className="text-xs text-muted-foreground">Spent this month</p>
           <p className="mt-1 text-lg font-medium text-rose-500">
-            {summary ? formatMoney(summary.monthly_expenses_primary, currency) : '—'}
+            {summary ? mask(formatMoney(summary.monthly_expenses_primary, currency)) : '—'}
           </p>
         </div>
       </section>
@@ -90,7 +112,7 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
                     <span className="truncate">{row.category_id === null ? 'Uncategorized' : row.category_name}</span>
                   </span>
                   <span className="ml-3 shrink-0 text-muted-foreground">
-                    {formatMoney(row.total, currency)}
+                    {mask(formatMoney(row.total, currency))}
                   </span>
                 </div>
                 <div className="h-1.5 overflow-hidden rounded-full bg-muted">
