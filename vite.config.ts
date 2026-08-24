@@ -8,6 +8,9 @@ import { VitePWA } from 'vite-plugin-pwa'
 const host = process.env.TAURI_DEV_HOST
 
 export default defineConfig({
+  // '/' for Tauri/native builds; the web deploy sets PWA_BASE=/app/ so the
+  // PWA can live under a path on the securo origin (same-origin => no CORS).
+  base: process.env.PWA_BASE || '/',
   plugins: [
     react(),
     tailwindcss(),
