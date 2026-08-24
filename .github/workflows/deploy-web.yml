@@ -31,15 +31,32 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Validate secrets shape
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          # Diagnose malformed values without printing them.
+          fail=0
+          case "$VPS_HOST" in
+            *[@/:]*) echo "::error::VPS_HOST must be a bare hostname/IP (found @, / or :)"; fail=1 ;;
+          esac
+          if [ "$(printf %s "$VPS_HOST" | wc -w)" != "1" ]; then
+            echo "::error::VPS_HOST contains whitespace"; fail=1
+          fi
+          case "$VPS_SSH_KEY" in
+            *"PRIVATE KEY"*) : ;;
+            *) echo "::error::VPS_SSH_KEY does not look like a private key (paste the file contents incl. BEGIN/END lines)"; fail=1 ;;
+          esac
+          exit $fail
       - name: Install SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
       - name: Rsync dist to VPS
         run: |
           rsync -az --delete \
-            -e "ssh -i ~/.ssh/id_ed25519" \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new -o ConnectTimeout=15" \
             dist/ \
             "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PWA_PATH || '/opt/securo/pwa' }}/"
