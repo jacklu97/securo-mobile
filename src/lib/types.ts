@@ -36,6 +36,7 @@ export interface Workspace {
   is_archived: boolean
   default_currency: string
   locale: string | null
+  role: string | null
   icon: string | null
   color: string | null
 }
