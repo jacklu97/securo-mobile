@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { todayIso } from '../lib/format'
-import { createTransaction, listAccounts, listCategories } from '../lib/securo'
+import { submitTransaction } from '../lib/outbox'
+import { listAccounts, listCategories } from '../lib/securo'
 import type { Account, Category, Workspace } from '../lib/types'
 
 interface AddTransactionScreenProps {
@@ -44,7 +45,7 @@ export function AddTransactionScreen({ workspace, onSaved }: AddTransactionScree
     setBusy(true)
     setError(null)
     try {
-      await createTransaction({
+      await submitTransaction({
         description: description.trim(),
         amount: value,
         date,

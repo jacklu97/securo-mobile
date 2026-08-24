@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Home, Landmark, List, Plus, Settings } from 'lucide-react'
+import { CloudOff } from 'lucide-react'
 import { WORKSPACE_STORAGE_KEY } from '../lib/api'
-import { listWorkspaces } from '../lib/securo'
+import { flushOutbox, onOutboxChange, pendingCount, startAutoFlush } from '../lib/outbox'
+import { listAccounts, listCategories, listWorkspaces } from '../lib/securo'
 import type { DeviceCredentials, Workspace } from '../lib/types'
 import { AccountsScreen } from './AccountsScreen'
 import { AddTransactionScreen } from './AddTransactionScreen'
@@ -31,6 +33,16 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
     localStorage.getItem(WORKSPACE_STORAGE_KEY),
   )
   const [loadError, setLoadError] = useState(false)
+  const [pending, setPending] = useState(pendingCount)
+
+  useEffect(() => {
+    const unsubscribe = onOutboxChange(() => setPending(pendingCount()))
+    const stopFlush = startAutoFlush()
+    return () => {
+      unsubscribe()
+      stopFlush()
+    }
+  }, [])
 
   useEffect(() => {
     listWorkspaces()
@@ -50,6 +62,14 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
     localStorage.setItem(WORKSPACE_STORAGE_KEY, id)
     setWorkspaceId(id)
   }
+
+  // Warm the lists the Add form depends on, so a later offline session can
+  // still record transactions from the persisted cache.
+  useEffect(() => {
+    if (!workspaceId) return
+    listAccounts().catch(() => {})
+    listCategories().catch(() => {})
+  }, [workspaceId])
 
   const workspace = workspaces.find((item) => item.id === workspaceId) ?? null
 
@@ -72,6 +92,19 @@ export function MainShell({ creds, onUnpaired }: MainShellProps) {
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col">
+      {pending > 0 && (
+        <button
+          type="button"
+          onClick={() => void flushOutbox()}
+          className="mx-4 mt-3 flex items-center gap-2.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2.5 text-left text-xs text-amber-600 dark:text-amber-300"
+        >
+          <CloudOff size={15} className="shrink-0" />
+          <span className="flex-1">
+            {pending} pending {pending === 1 ? 'entry' : 'entries'} — will upload when the
+            instance is reachable. Tap to retry now.
+          </span>
+        </button>
+      )}
       <div className="flex-1 pb-20">
         {tab === 'home' && (
           <DashboardScreen

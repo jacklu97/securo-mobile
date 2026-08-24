@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Eye, EyeOff } from 'lucide-react'
 import { formatMoney } from '../lib/format'
 import { CategoryIcon } from './CategoryIcon'
+import { onSyncComplete } from '../lib/outbox'
 import { getDashboardSummary, getSpendingByCategory } from '../lib/securo'
 import type { DashboardSummary, SpendingByCategory, Workspace } from '../lib/types'
 
@@ -17,13 +18,17 @@ export function DashboardScreen({ workspace, workspaces, onSelectWorkspace }: Da
   const [spending, setSpending] = useState<SpendingByCategory[]>([])
   const [error, setError] = useState(false)
 
+  const [reloadKey, setReloadKey] = useState(0)
+
+  useEffect(() => onSyncComplete(() => setReloadKey((k) => k + 1)), [])
+
   useEffect(() => {
     if (!workspace) return
     setSummary(null)
     setError(false)
     getDashboardSummary().then(setSummary).catch(() => setError(true))
     getSpendingByCategory().then(setSpending).catch(() => {})
-  }, [workspace])
+  }, [workspace, reloadKey])
 
   const currency = summary?.primary_currency ?? workspace?.default_currency ?? 'USD'
 

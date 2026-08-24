@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Search, SlidersHorizontal } from 'lucide-react'
 import { formatDay, formatMoney } from '../lib/format'
+import { onSyncComplete } from '../lib/outbox'
 import { listAccounts, listCategories, listTransactions } from '../lib/securo'
 import type {
   Account,
@@ -67,6 +68,12 @@ export function TransactionsScreen({ workspace }: TransactionsScreenProps) {
     // Reload from page 1 whenever the workspace changes; search runs via its own debounce.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace, load])
+
+  useEffect(
+    () => onSyncComplete(() => void load(1, q, filters, true)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [load],
+  )
 
   const handleSearch = (value: string) => {
     setQ(value)

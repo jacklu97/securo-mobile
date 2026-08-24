@@ -56,8 +56,13 @@ export function SettingsScreen({ creds, onUnpaired }: SettingsScreenProps) {
     } catch (err) {
       // 401 = dead refresh token; 404 = the device row itself was revoked.
       // Either way this pairing is gone — reset to the pair screen instead
-      // of showing a misleading "Offline".
-      if (err instanceof ApiError && (err.status === 401 || err.status === 404)) {
+      // of showing a misleading "Offline". Transient failures (network,
+      // gateway pages, 5xx) must never unpair.
+      if (
+        err instanceof ApiError &&
+        !err.transient &&
+        (err.status === 401 || err.status === 404)
+      ) {
         clearCredentials()
         onUnpaired()
         return
