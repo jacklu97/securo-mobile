@@ -1,10 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Base application theme. Status/navigation bars are deliberately left
+         at the platform default (no tint overrides): the system guarantees
+         readable icon contrast there, which our app-colored bars did not. -->
     <style name="Theme.app" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Status bar matches securo's dark background; light icons for contrast. -->
-        <item name="android:statusBarColor">#0C0D12</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:navigationBarColor">#0C0D12</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+        <!-- Customize your theme here. -->
     </style>
 </resources>
